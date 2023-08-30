@@ -86,16 +86,6 @@
               ]">
           </PermissionComponent>
           <PermissionComponent
-              title="موضوعات دیدگاه ها"
-              :permissions="[
-              {id:1,label:'لیست موضوعات دیدگاه ها',perm:['view_any_commentsubjects']},
-              {id:2,label:'مشاهده موضوعات دیدگاه',perm:['view_commentsubjects']},
-              {id:3,label:'ثبت موضوعات دیدگاه',perm:['create_commentsubjects']},
-              {id:4,label:'ویرایش موضوعات دیدگاه',perm:['update_commentsubjects']},
-              {id:5,label:'حذف موضوعات دیدگاه',perm:['delete_commentsubjects']},
-              ]">
-          </PermissionComponent>
-          <PermissionComponent
               title="برند ها"
               :permissions="[
               {id:1,label:'لیست برند ها',perm:['view_any_brands']},
