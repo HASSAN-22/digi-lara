@@ -15,7 +15,7 @@ Step 1: clone the project.
 
 step 2: open the `backend` folder.
 
-step 3: Create your database and import `shop.sql`.
+step 3: Create your database.
 
 Step 4: rename the .even.example to `.env`.
 
@@ -37,6 +37,8 @@ Step 6: open terminal and run this commands:
 ```php 
 composer install
 php artisan config:cache
+php artisan migrate
+php artisan db:seed --class="PermissionSeeder"
 php artisan storage:link
 php artisan serve
 ```
@@ -62,6 +64,6 @@ npm run serve
 #### username and password:
 ```
 username: 00000000000
-password: 123456789
+password: 12345678
 ```
 Hope you enjoy.
