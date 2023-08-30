@@ -2,9 +2,10 @@
 A complete multi-vendor store with all facilities
 
 # requirements
-PHP version `^8.1`\
-Node version `18.14.0`\
-Composer version `2.5.3`
+PHP version >>> `^8.1`\
+Node version >>> `18.14.0`\
+Npm version >>> `9.4.1`\
+Composer version >>> `2.5.3`
 
 
 ## How to use in localhost:
