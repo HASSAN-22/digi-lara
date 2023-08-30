@@ -146,9 +146,9 @@ if(! function_exists('setEnvironmentValue')){
 if(! function_exists('getShopConfig')){
     function getShopConfig()
     {
-        $storeDetail = json_decode(Shopconfig::getValue('store_detail')->value);
-        $footerBox = json_decode(Shopconfig::getValue('footer_box')->value);
-        $socialMedia = json_decode(Shopconfig::getValue('social_media')->value);
+        $storeDetail = json_decode(Shopconfig::getValue('store_detail')->value??"[]");
+        $footerBox = json_decode(Shopconfig::getValue('footer_box')->value??"[]");
+        $socialMedia = json_decode(Shopconfig::getValue('social_media')->value??"[]");
         return ['store_detail'=>$storeDetail,'footer_box'=>$footerBox,'social_media'=>$socialMedia];
     }
 }

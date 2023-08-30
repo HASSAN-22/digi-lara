@@ -929,7 +929,7 @@ class SiteController extends Controller
     private function getWidgets($widgets): mixed
     {
         $columns = ['id','price','amazing_price','ir_name','image','slug','amazing_offer_percent','amazing_offer_status','amazing_offer_expire'];
-        $widgets = json_decode($widgets['data'], true);
+        $widgets = json_decode($widgets['data']??"[]", true);
         foreach ($widgets as $key => $widget) {
             if (in_array($widget['name'], ['amazing_supermarket', 'amazing_offer'])) {
                 $widgets[$key]['products'] = ProductService::product()->published()->activeSeller()->findById(...array_column($widget['product_ids'], 'value'))->get(...$columns);
