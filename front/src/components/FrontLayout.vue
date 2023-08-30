@@ -419,7 +419,7 @@ async function index(){
     if(data.social_media){
       store.state.configSite.social_media = {...data.store_detail};
     }
-  })
+  }).catch(err=>{})
 }
 
 async function indexHeader(){
