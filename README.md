@@ -39,6 +39,7 @@ composer install
 php artisan config:cache
 php artisan migrate
 php artisan db:seed --class="PermissionSeeder"
+php artisan db:seed --class="PageSeeder"
 php artisan storage:link
 php artisan serve
 ```
