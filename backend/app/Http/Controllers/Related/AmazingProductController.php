@@ -42,8 +42,8 @@ class AmazingProductController extends Controller
            'category_id'=>['required','numeric','exists:categories,id']
         ]);
         try{
-            $products = Product::find($request->product_ids);
-            $products->map(fn($product)=>$product->update(['amazing_offer_status'=>StatusEnum::ACTIVE,'amazing_offer_expire'=>now()->addHours(24)->timestamp]));
+            Product::whereIn('id',$request->product_ids)
+            ->update(['amazing_offer_status'=>StatusEnum::ACTIVE,'amazing_offer_expire'=>now()->addHours(24)->timestamp]);
             return response(['status'=>'success'],201);
         }catch (\Exception $e){
             return response(['status'=>'error','e'=>$e->getMessage()],500);
