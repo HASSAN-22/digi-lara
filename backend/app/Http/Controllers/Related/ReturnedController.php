@@ -92,7 +92,7 @@ class ReturnedController extends Controller
                     'user_id'=>$orderDetail->user_id,
                     'order_id'=>$order->id,
                     'amount'=>$orderDetail->amount,
-                    'description'=>" بابت مرجوع شدن سفارش با شماره سفارش {$order->id} و شماره مرجوعی {$orderDetail->id} ",
+                    'description'=>" بابت مرجوع شدن سفارش با کد سفارش {$order->id} و کد مرجوعی {$orderDetail->id} ",
                     'status'=>DebtorStatusEnum::PENDING,
                 ]);
             }
