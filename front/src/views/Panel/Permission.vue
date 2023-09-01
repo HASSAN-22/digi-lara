@@ -116,16 +116,6 @@
               ]">
           </PermissionComponent>
           <PermissionComponent
-              title="کالا ها"
-              :permissions="[
-              {id:1,label:'لیست کالا ها',perm:['view_any_products']},
-              {id:2,label:'مشاهده کالا',perm:['view_products']},
-              {id:3,label:'ثبت کالا',perm:['create_products']},
-              {id:4,label:'ویرایش کالا',perm:['update_products']},
-              {id:5,label:'حذف کالا',perm:['delete_products']},
-              ]">
-          </PermissionComponent>
-          <PermissionComponent
               title="کالاهای شگفت انگیز"
               :permissions="[
               {id:1,label:'لیست کالاهای شگفت انگیز',perm:['view_any_amazing_products']},
