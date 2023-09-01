@@ -9,7 +9,6 @@ use App\Models\Product;
 use App\Models\User;
 use Illuminate\Support\Collection;
 use  Illuminate\Contracts\Auth\Authenticatable;
-use Illuminate\Support\Facades\Log;
 
 class BasketService
 {
@@ -87,23 +86,24 @@ class BasketService
     {
         foreach (self::$baskets as $basket) {
             $product = $basket->product;
-            $count = $basket->count;
             $propertyAmount = self::getPropertyAmount($basket)['amount'];
             self::$originalAmount += $propertyAmount;
-            $amount = $propertyAmount + ($product->price * $basket->count);
+            $amount = $propertyAmount;
             if ($product->amazing_offer_status == 'yes') {
                 $amount = self::amazingOffer($amount, $product);
-            } else if ($product->amazing_price != null && $product->amazing_price > 0) {
-                $amount = self::amazingPrice($propertyAmount, $product, $count, $amount);
+            } else if ($product->amazing_price != null) {
+                $amount = self::amazingPrice((int)$product->price, (int)$product->amazing_price);
             } else {
                 $coupon = $basket->coupon;
                 if (self::$withCoupon and $coupon) {
                     $amount = self::couponCategories($coupon, $product, $amount);
                     $amount = self::couponProducts($coupon, $product, $amount);
+                }else{
+                    $amount = $product->price;
                 }
-                $amount = $amount * $count;
             }
-            self::$originalAmount += ($count * $product->price);
+            self::$originalAmount += ($basket->count * $product->price);
+            $amount = $amount * $basket->count;
             self::$amount += $amount;
         }
         return new static();
@@ -117,22 +117,24 @@ class BasketService
     public static function getDiscount(Basket $basket): array
     {
         $product = $basket->product;
-        $count = $basket->count;
         $propertyAmount = self::getPropertyAmount($basket)['amount'];
-        $amount = $propertyAmount + ($product->price*$basket->count);
+        $amount = $propertyAmount;
         if ($product->amazing_offer_status == 'yes') {
             self::$discountType = 'amazing_offer';
             $amount = self::amazingOffer($amount, $product);
         } else if ($product->amazing_price != null && $product->amazing_price > 0) {
             self::$discountType = 'amazing_price';
-            $amount = self::amazingPrice($propertyAmount, $product, $count, $amount);
+            $amount = self::amazingPrice((int)$product->price, (int)$product->amazing_price);
         } else {
             $coupon = $basket->coupon;
             if ($coupon) {
                 $amount = self::couponCategories($coupon, $product, $amount);
                 $amount = self::couponProducts($coupon, $product, $amount);
+            }else{
+                $amount = $product->price;
             }
         }
+        $amount = ($amount * $basket->count);
         return ['amount'=>$amount,'discount'=>self::$discount,'type'=>self::$discountType, 'couponIds'=>self::$couponIds];
     }
 
@@ -240,17 +242,14 @@ class BasketService
 
     /**
      * Calculate amazing price
-     * @param mixed $propertyAmount
-     * @param mixed $product
-     * @param mixed $count
-     * @param mixed $amount
+     * @param int $productPrice
+     * @param int $amazingPrice
      * @return float|int|mixed
      */
-    private static function amazingPrice(mixed $propertyAmount, mixed $product, mixed $count, mixed $amount): mixed
+    private static function amazingPrice(int $productPrice, int $amazingPrice): mixed
     {
-        $result = $propertyAmount + ($product->amazing_price * $count);
-        self::$discount += $amount - $result;
-        return $result;
+        self::$discount += $productPrice - $amazingPrice;
+        return $amazingPrice;
     }
 
     /**
@@ -261,9 +260,8 @@ class BasketService
      */
     private static function amazingOffer(mixed $amount, mixed $product): string|int|float
     {
-        $result = getDiscount($amount, $product->amazing_offer_percent, false);
-        $amount = $result;
-        self::$discount += $result;
+        $amount = getDiscount($amount, $product->amazing_offer_percent, false);
+        self::$discount += $amount;
         return $amount;
     }
 
