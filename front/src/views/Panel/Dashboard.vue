@@ -80,10 +80,10 @@
       <div class="flex flex-col gap-5 border border-gray-200 rounded-lg p-3 mb-5">
         <h4 class="!font-medium text-2xl fm:text-lg">اخرین سفارشات</h4>
         <div class="flex justify-between items-center">
-          <div v-for="order in latestOrders" :key="order.id">
-            <routerLink :to="{name:'ProductDetail', params:{slug:order.product.slug}}" class="flex flex-col gap-3 items-center border border-gray-100 hover:shadow p-3">
-              <div class="">
-                <img :src="$store.state.url + order.image" class="w-[55%]"/>
+          <div v-for="order in latestOrders" :key="order.id" class="w-[36rem] bg-red">
+            <routerLink :to="{name:'ProductDetail', params:{slug:order.product.slug}}" class="flex flex-col gap-3 items-center border border-gray-100 hover:shadow p-3 h-[18rem]">
+              <div class="w-[10rem] h-[10rem]">
+                <img :src="$store.state.url + order.image" class=""/>
               </div>
               <span class="text-sm !font-medium">{{order.name}}</span>
               <span class="text-sm !font-medium">{{$store.getters.numberFormat(order.amount)}} ریال</span>
