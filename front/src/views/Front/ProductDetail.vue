@@ -134,7 +134,7 @@
               <div v-for="color in colors" :key="color.id">
                 <div
                     :class="['relative rounded-full h-[3rem] w-[3rem] border border-gray-200 flex justify-center items-center cursor-pointer', (colorSelected[0].id === color.id) ? 'bg-[#19bfd3]' : 'bg-white']"
-                    @click="colorSelected = [{id:color.id, price:color.price}]"
+                    @click="colorChange([{id:color.id, price:color.price}])"
                 >
                   <div class="rounded-full h-[2rem] w-[2rem] flex justify-center items-center" :style="{background:color.color.color_code}">
                     <span v-if="colorSelected[0].id === color.id" class="flex"><i :class="['far fa-check text-lg',color.color.color === 'سفید' ? 'text-black' : 'text-white']"></i></span>
@@ -209,7 +209,7 @@
                   <div class="flex items-center gap-4 justify-end">
                     <div class="flex items-end flex-col gap-2">
                       <span class="text-red-500 text-sm" v-if="productPrice.discount.length > 0">تخفیف {{productPrice.discount}} ریال</span>
-                      <span class="!font-medium">{{productPrice.amount}} ریال</span>
+                      <span class="!font-medium">{{$store.getters.numberFormat(price)}} ریال</span>
                     </div>
                   </div>
                   <div class="w-full mt-8">
@@ -734,6 +734,7 @@ let reportTitle = ref('');
 
 let purchased = ref(false);
 let price = ref(0);
+let defalutPrice = ref(0);
 let product = ref(null);
 let relatedProducts = ref([]);
 let categories = ref([]);
@@ -789,7 +790,9 @@ const productPrice = computed(()=>{
   }else{
     amount = product.value.price
   }
-  return {discount:discount > 0 ? store.getters.numberFormat(discount) : '', amount:store.getters.numberFormat(amount)}
+  price.value = amount;
+  defalutPrice.value = amount;
+  return {discount:discount > 0 ? store.getters.numberFormat(discount) : ''}
 })
 
 async function getData(_loading=true){
@@ -804,7 +807,7 @@ async function getData(_loading=true){
     sizes.value = product.value.product_sizes.sort((a, b) => a.price > b.price ? 1 : -1)
     if(colors.value.length > 0){
       let color = colors.value[0];
-      colorSelected.value = [{id:color.id, price:color.price}]
+      colorChange([{id:color.id, price:color.price}])
     }
     if(sizes.value.length > 0){
       changeSize([sizes.value[0].id, sizes.value[0].price], false)
@@ -1035,7 +1038,12 @@ function showCustomerImageModal(commentId){
 function changeSize(event, isEvent = true){
   let result = isEvent ? event.target.value.split(',') : event;
   sizeSelected.value = [{id:result[0], price:result[1]}]
-  price.value = parseInt(productPrice.value) + parseInt(result[1]);
+  price.value = parseInt(defalutPrice.value) + parseInt(result[1]);
+}
+
+function colorChange(colorData){
+  colorSelected.value = colorData;
+  price.value = parseInt(defalutPrice.value) + parseInt(colorData[0].price);
 }
 
 async function toggleExistNotify(){
