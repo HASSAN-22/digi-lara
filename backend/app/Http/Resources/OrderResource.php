@@ -30,8 +30,7 @@ class OrderResource extends JsonResource
             'icon'=>ShippingEnum::getIcon($this->shipping_status),
             'created_at'=>dateToPersian($this->created_at),
             'time_left'=>$diffTime->h > 0 ? 0 : $diffTime->i,
-//            'can_returned'=>$this->created_at->addDays(config('app.returned_day')) > now(),
-            'can_returned'=>$this->created_at->addDays(config('app.returned_day')) < now(),
+            'can_returned'=>$this->created_at->addDays(config('app.returned_day')) > now(),
             'amount'=>number_format(abs($this->orderDetails->sum('amount') - $this->reduced_wallet)),
             'order_details'=>$this->orderDetails->map(fn($item)=>str_replace("{$largeImageSize}x{$largeImageSize}_","{$smallImageSize}x{$smallImageSize}_",$item->image))
         ];
