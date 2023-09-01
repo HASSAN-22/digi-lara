@@ -188,7 +188,7 @@
               </select>
             </div>
             <div>
-              <label class="fm:text-sm" for="sellerId"> مدت کارانتی<b class="text-red-500 !font-bold">*</b></label>
+              <label class="fm:text-sm" for="sellerId"> مدت گارانتی<b class="text-red-500 !font-bold">*</b></label>
               <select v-model="guarantee_month" class="fm:text-sm border border-gray-200 p-2 outline-none rounded-lg w-full">
                 <option value="" selected>--- انتخاب کنید ---</option>
                 <option value="6">6 ماه</option>
