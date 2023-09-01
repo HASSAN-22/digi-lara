@@ -7,10 +7,12 @@ use App\Enums\PublishEnum;
 use App\Enums\ShippingEnum;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\OrderDetailResource;
+use App\Http\Resources\OrderDetailReturnedResource;
 use App\Http\Resources\OrderResource;
 use App\Models\Order;
 use App\Models\Orderdetail;
 use App\Models\Product;
+use App\Models\Returned;
 use App\Models\Shopconfig;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -103,8 +105,9 @@ class OrderController extends Controller
     public function getReturned(){
         $this->authorize('viewAny',Order::class);
         $status = [ShippingEnum::RETURNED,ShippingEnum::PENDING_DELIVERY_TO_STORE,ShippingEnum::PENDING_PAY_BACK,ShippingEnum::SUCCESS_PAY_BACK];
-        $currentOrders = auth()->user()->orders()->whereIn('shipping_status',$status)->with(['orderDetails'=>fn($q)=>$q->select('id','order_id','image'),'returned'])->paginate(10);
-        return OrderResource::collection($currentOrders);
+        $returndes = Returned::whereRelation('order','user_id',auth()->Id())
+            ->with(['orderDetail'=>fn($q)=>$q->select('id','image','price','shipping_status'),'order'=>fn($q)=>$q->select('id','reduced_wallet')])->whereIn('status',$status)->latest()->paginate(10);
+        return OrderDetailReturnedResource::collection($returndes);
     }
 
     /**
@@ -159,8 +162,9 @@ class OrderController extends Controller
     public function getCustomerReturned(){
         $this->authorize('viewAnyAdminOrSeller',Order::class);
         $status = [ShippingEnum::RETURNED,ShippingEnum::PENDING_DELIVERY_TO_STORE,ShippingEnum::PENDING_PAY_BACK,ShippingEnum::SUCCESS_PAY_BACK];
-        $currentOrders = $this->orderQuery()->whereIn('shipping_status',$status)->with(['orderDetails'=>fn($q)=>$q->select('id','order_id','image'),'returned'])->paginate(10);
-        return OrderResource::collection($currentOrders);
+        $returndes = Returned::with(['orderDetail'=>fn($q)=>$q->select('id','image','price','shipping_status'),'order'=>fn($q)=>$q->select('id','reduced_wallet')])
+            ->whereIn('status',$status)->latest()->paginate(10);
+        return OrderDetailReturnedResource::collection($returndes);
     }
 
     /**
@@ -335,7 +339,7 @@ class OrderController extends Controller
         DB::beginTransaction();
         try{
             $amount = (clone $orderdetails)->whereNotIn('id', $ids)->values()->sum('amount');
-            $wallet = $order->user->wallet();
+            $wallet = $order->user->wallet;
             if ($amount < $order->reduced_wallet and $wallet) {
                 $amount = $order->reduced_wallet - $amount;
                 $wallet->update(['amount' => DB::raw("amount + {$amount}")]);

@@ -28,18 +28,7 @@
               </div>
             </div>
           </div>
-          <div class="relative group" v-else-if="order.shipping_status === 'returned' && $store.state.user.access === 'admin'">
-            <span class="cursor-pointer"><i class="far fa-ellipsis text-2xl fm:text-lg"></i></span>
-            <div class="absolute top-[1rem] hidden group-hover:block right-[-10rem] w-[12rem] bg-white p-3 rounded-lg shadow-lg">
-              <div class="text-center" v-if="order.returned_status !== 'success_pay_back'">
-                <Button text="ویرایش وضعیت مرجوعی" @click="showReturnedStatus(order.returned_id,order.returned_status)" :btnLoading="btnLoading" my_class="!text-blue-400 !p-0 !border-none !bg-white"/>
-              </div>
-              <div class="border-b border-gray-200 my-2 w-full"></div>
-              <div class="text-center">
-                <Button text="مشاهده توضیحات مشکل" @click="showReturnedProblem(order.returned_id)" :btnLoading="btnLoading" my_class="!text-orange-400 !p-0 !border-none !bg-white"/>
-              </div>
-            </div>
-          </div>
+
         </div>
         <routerLink :to="{name:'OrderDetail',params:{order_id:order.id}}">
           <div class="flex fm:flex-col justify-between items-center">
@@ -116,32 +105,33 @@
 
     </Modal>
 
-    <Modal title="مرجوع کردن کالا" save="ثبت" :btnLoading="btnLoading" @callback="returned()" ref="returnedModal">
+    <Modal title="مرجوع کردن کالا" save="ثبت" :btnLoading="btnLoading" width="w-[55%]" @callback="returned()" ref="returnedModal">
+      <div class="mb-5">
+        <div class="flex fd:flex-wrap fm:flex-col justify-between gap-2 items-center">
+          <div v-for="order in orderDetails" :key="order.id" class="mb-2 fd:w-[47%] fm:w-full">
+            <div>
+              <input type="checkbox" @change="orderDetailSelectChange(order.id)" :checked="orderDetailsSelected.filter(item=>item === order.id).length > 0"/>
+            </div>
+            <div class="flex gap-3 items-center border border-gray-100 h-[9rem] hover:shadow p-3">
+              <div class="w-[35%]">
+                <img :src="$store.state.url + order.image" />
+              </div>
+              <div class="flex flex-col gap-2">
+                <span class="text-sm !font-medium">{{order.name}}</span>
+                <span class="text-sm !font-medium">{{$store.getters.numberFormat(order.amount)}} ریال</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
       <div class="mt-5">
         <Textarea label="توضیح مشکلات" v-model="problemDescription" id="problemDescription" :maxlength="2000" :alert="problemDescription.length + '/2000'"/>
       </div>
     </Modal>
 
-    <Modal title="ویرایش وضعیت مرجوعی" save="ثبت تغییرات" permission="update_returneds" :btnLoading="btnLoading" @callback="updateReturnedStatus()" ref="returnedStatusModal">
 
-      <div class="mt-5">
-        <label class="fm:text-sm">وضعیت مرجوعی<b class="text-red-500 !font-bold">*</b></label>
-        <select v-model="returnedStatus" class="fm:text-sm border border-gray-200 p-2 outline-none rounded-lg w-full">
-          <option value="" selected disabled>--- انتخاب کنید ---</option>
-          <option value="pending_delivery_to_store">درانتظار ارسال به فروشگاه</option>
-          <option value="pending_pay_back">در انتظار بازگشت مبلغ سفارش</option>
-          <option value="success_pay_back">مبلغ سفارش با موفقیت بازگردانده شد</option>
-        </select>
-      </div>
-
-    </Modal>
-
-    <Modal title="مشاهده مشکل" save="ثبت تغییرات" ref="showProblemDescriptionModal">
-      <div class="mt-5">
-        <p v-html="showProblemDescription" class="break-all"></p>
-      </div>
-    </Modal>
     <Loading :loading="loading" />
+    <ValidationError />
   </div>
 </template>
 
@@ -158,6 +148,7 @@ import Toast from "@/plugins/toast";
 import Modal from "@/components/Modal.vue";
 import Loading from "@/components/Loading.vue";
 import Textarea from "@/components/Textarea.vue";
+import ValidationError from "@/components/ValidationError.vue";
 
 const props = defineProps({
   orders:{
@@ -180,60 +171,36 @@ let loading = ref(false)
 let isUpdate = ref(false)
 let openModal = ref(null)
 let returnedModal = ref(null)
-let returnedStatusModal = ref(null)
-let showProblemDescriptionModal = ref(null)
 let orderId = ref(null)
 
-let showProblemDescription = ref('')
 let problemDescription = ref('')
 let shippingStatus = ref('')
-let returnedStatus = ref('')
-let returnedId = ref(0)
+let orderDetails = ref([]);
+let orderDetailsSelected = ref([]);
 
-async function showReturnedProblem(_returnedId){
+
+async function showReturned(_orderId){
+  orderDetailsSelected.value = [];
   loading.value = true;
-  await axios.get(`${store.state.api}returned-problem/${_returnedId}`).then(resp=>{
-    showProblemDescription.value = resp.data.data.description;
-    showProblemDescriptionModal.value.toggleModal();
+  orderId.value = _orderId;
+  await axios.get(`${store.state.api}returned/${orderId.value}`).then(async resp=>{
+    orderDetails.value = resp.data.data;
+    returnedModal.value.toggleModal();
   }).catch(err=>{
     Toast.error();
   })
   loading.value = false;
 }
 
-function showReturnedStatus(_returnedId, _status){
-  returnedId.value = _returnedId;
-  if(_status !== ''){
-    returnedStatus.value = _status;
-  }
-  returnedStatusModal.value.toggleModal();
-}
-
-async function updateReturnedStatus(){
-  btnLoading.value = true;
-  await axios.post(`${store.state.api}returned-status/${returnedId.value}`,{status:returnedStatus.value}).then(async resp=>{
-    await emits('parentMethod',false, store.state.current)
-    Toast.success();
-    returnedStatusModal.value.toggleModal();
-  }).catch(err=>{
-    Toast.error();
-  })
-  btnLoading.value = false;
-}
-
-function showReturned(_orderId){
-  orderId.value = _orderId;
-  returnedModal.value.toggleModal();
-}
-
 async function returned(){
   btnLoading.value = true;
-  await axios.post(`${store.state.api}returned`,{problem_description:problemDescription.value,order_id:orderId.value}).then(async resp=>{
+  let _orderDetailIds = JSON.stringify(orderDetailsSelected.value)
+  await axios.post(`${store.state.api}returned`,{problem_description:problemDescription.value,order_id:orderId.value,order_detail_ids:_orderDetailIds}).then(async resp=>{
     await emits('parentMethod',false, store.state.current)
     Toast.success();
     returnedModal.value.toggleModal();
   }).catch(err=>{
-    Toast.error();
+    store.commit('handleError',err)
   })
   btnLoading.value = false;
 }
@@ -275,4 +242,13 @@ async function cancel(orderId){
   btnLoading.value = false;
 }
 
+
+function orderDetailSelectChange(_orderId){
+  let exists = orderDetailsSelected.value.filter(item=>item === _orderId).length > 0;
+  if(exists){
+    orderDetailsSelected.value = orderDetailsSelected.value.filter(item=>item !== _orderId)
+  }else{
+    orderDetailsSelected.value.push(_orderId)
+  }
+}
 </script>

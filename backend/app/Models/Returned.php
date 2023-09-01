@@ -13,11 +13,20 @@ class Returned extends Model
 
     protected $fillable = [
         'order_id',
+        'orderdetail_id',
         'description',
         'status',
     ];
 
     public function order(){
         return $this->belongsTo(Order::class);
+    }
+
+    public function orderDetail(){
+        return $this->belongsTo(Orderdetail::class,'orderdetail_id','id');
+    }
+
+    public function user(){
+        return $this->belongsTo(User::class);
     }
 }

@@ -51,7 +51,7 @@
         </div>
         <div v-if="myOrdersTab === 3">
           <div v-if="returnedOrders.length > 0">
-            <OrderList :key="orderListKey" :orders="returnedOrders" :showPercentage="false" @parentMethod="getReturned"/>
+            <ReturnedComponent :key="orderListKey" :returnedOrders="returnedOrders" @parentMethod="getReturned"/>
             <div v-if="returnedOrders.length > 0">
               <Paginate :current="$store.state.current" :next="$store.state.next" :previous="$store.state.previous" :total="$store.state.total" @callGetPage="getReturned"/>
             </div>
@@ -115,7 +115,7 @@
         </div>
         <div v-if="customerOrdersSelected === 3">
           <div v-if="customerReturnedOrders.length > 0">
-            <OrderList :key="customerOrderListKey" :orders="customerReturnedOrders" :showPercentage="false" @parentMethod="getCustomerReturned"/>
+            <ReturnedComponent class="mt-8" :key="customerOrderListKey" :returnedOrders="customerReturnedOrders" @parentMethod="getCustomerReturned"/>
             <div v-if="customerReturnedOrders.length > 0">
               <Paginate :current="$store.state.current" :next="$store.state.next" :previous="$store.state.previous" :total="$store.state.total" @callGetPage="getCustomerReturned"/>
             </div>
@@ -156,6 +156,8 @@ import axios from "@/plugins/axios";
 import store from "@/store";
 import OrderList from "@/components/OrderList.vue";
 import UserCanAction from "@/components/UserCanAction.vue";
+import Button from "@/components/Button.vue";
+import ReturnedComponent from "@/components/ReturnedComponent.vue";
 
 
 let model = ref('order')

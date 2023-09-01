@@ -15,59 +15,52 @@ use Illuminate\Validation\Rules\Enum;
 
 class ReturnedController extends Controller
 {
+
+    /**
+     * Get order details
+     * @param Order $order
+     * @return \Illuminate\Contracts\Foundation\Application|\Illuminate\Contracts\Routing\ResponseFactory|\Illuminate\Foundation\Application|\Illuminate\Http\Response
+     * @throws \Illuminate\Auth\Access\AuthorizationException
+     */
+    public function view(Order $order){
+        $this->authorize('viewAny',$order);
+        $orderDetails = $order->orderDetails()->doesntHave('returned')->get();
+        return response(['status'=>'success','data'=>$orderDetails]);
+    }
+
+    /**
+     * Store returned requests
+     * @param Request $request
+     * @return \Illuminate\Contracts\Foundation\Application|\Illuminate\Contracts\Routing\ResponseFactory|\Illuminate\Foundation\Application|\Illuminate\Http\Response
+     * @throws \Illuminate\Auth\Access\AuthorizationException
+     */
     public function store(Request $request){
-        $request->validate(['problem_description'=>['required','string','max:2000']]);
+        $request->merge(['order_detail_ids'=>json_decode($request->order_detail_ids,true)]);
+        $request->validate([
+            'problem_description'=>['required','string','max:2000'],
+            'order_detail_ids'=>['required','array'],
+            'order_detail_ids.*'=>['required','numeric','exists:orderdetails,id'],
+        ]);
         $this->authorize('create',Returned::class);
         DB::beginTransaction();
         try{
-            $returneds = Returned::create([
-                'order_id'=>$request->order_id,
-                'description'=>$request->problem_description,
-                'status'=>ShippingEnum::PENDING_DELIVERY_TO_STORE,
-            ]);
+            $data = [];
+            foreach ($request->order_detail_ids as $id){
+                $data[] = [
+                    'orderdetail_id'=>$id,
+                    'order_id'=>$request->order_id,
+                    'description'=>$request->problem_description,
+                    'status'=>ShippingEnum::PENDING_DELIVERY_TO_STORE,
+                    'created_at'=>now(),
+                    'updated_at'=>now(),
+                ];
+            }
+            Returned::insert($data);
             $order = Order::with('orderDetails')->find($request->order_id);
-            $order->update(['shipping_status'=>ShippingEnum::RETURNED]);
-            $order->orderDetails()->update(['shipping_status'=>ShippingEnum::RETURNED]);
-            DB::commit();
-            return response(['status'=>'success'],201);
-        }catch (\Exception $e){
-            DB::rollBack();
-            return response(['status'=>'error'],500);
-        }
-    }
-
-    public function updateStatus(Request $request, Returned $returned){
-        $request->validate([
-            'status'=>['required','string','max:255', new Enum(ShippingEnum::class)]
-        ]);
-        $this->authorize('update',$returned);
-        DB::beginTransaction();
-        try{
-            $returned->update(['status'=>ShippingEnum::from($request->status)]);
-            if($request->status == ShippingEnum::SUCCESS_PAY_BACK->value){
-                Log::info($request->status);
-                $order = $returned->order;
-                $wallet = $order->wallet;
-                if($wallet){
-                    $wallet->update(['amount'=>DB::raw("amount + {$order->reduced_wallet}")]);
-                    $order->reduced_wallet = 0;
-                    $order->save();
-                }
-                $orderDetails = $order->orderDetails;
-                $debtors = $orderDetails->values()->pluck('user_id')->unique()->map(function ($id)use($orderDetails){
-                    $results = (clone $orderDetails)->where('user_id',$id)->values();
-                    $orderId = $results[0]->order_id;
-                    return [
-                        'user_id'=>$id,
-                        'order_id'=>$orderId,
-                        'amount'=>$results->sum('amount'),
-                        'description'=>" بابت مرجوع شدن سفارش {$orderId}",
-                        'status'=>DebtorStatusEnum::PENDING,
-                        'created_at'=>now(),
-                        'updated_at'=>now()
-                    ];
-                });
-                Debtor::insert($debtors->toArray());
+            $order->orderDetails()->whereIn('id',$request->order_detail_ids)->update(['shipping_status'=>ShippingEnum::RETURNED]);
+            $orderDetailCount = $order->orderDetails()->whereNotIn('id',$request->order_detail_ids)->get()->count();
+            if($orderDetailCount <= 0){
+                $order->update(['shipping_status'=>ShippingEnum::RETURNED]);
             }
             DB::commit();
             return response(['status'=>'success'],201);
@@ -77,6 +70,45 @@ class ReturnedController extends Controller
         }
     }
 
+    /**
+     * Update status
+     * @param Request $request
+     * @param Returned $returned
+     * @return \Illuminate\Contracts\Foundation\Application|\Illuminate\Contracts\Routing\ResponseFactory|\Illuminate\Foundation\Application|\Illuminate\Http\Response
+     * @throws \Illuminate\Auth\Access\AuthorizationException
+     */
+    public function updateStatus(Request $request, Returned $returned){
+        $request->validate([
+            'status'=>['required','string','max:255', new Enum(ShippingEnum::class)]
+        ]);
+        $this->authorize('update',$returned);
+        DB::beginTransaction();
+        try{
+            $returned->update(['status'=>ShippingEnum::from($request->status)]);
+            if($request->status == ShippingEnum::SUCCESS_PAY_BACK->value){
+                $order = $returned->order;
+                $orderDetail = $returned->orderDetail;
+                Debtor::create([
+                    'user_id'=>$orderDetail->user_id,
+                    'order_id'=>$order->id,
+                    'amount'=>$orderDetail->amount,
+                    'description'=>" بابت مرجوع شدن سفارش با شماره سفارش {$order->id} و شماره مرجوعی {$orderDetail->id} ",
+                    'status'=>DebtorStatusEnum::PENDING,
+                ]);
+            }
+            DB::commit();
+            return response(['status'=>'success'],201);
+        }catch (\Exception $e){
+            DB::rollBack();
+            return response(['status'=>'error'],500);
+        }
+    }
+
+    /**
+     * Receive returned description
+     * @param Returned $returned
+     * @return \Illuminate\Contracts\Foundation\Application|\Illuminate\Contracts\Routing\ResponseFactory|\Illuminate\Foundation\Application|\Illuminate\Http\Response
+     */
     public function orderProblem(Returned $returned){
         return response(['status'=>'success','data'=>$returned]);
     }

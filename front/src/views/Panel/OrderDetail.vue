@@ -112,7 +112,8 @@
               <span class="text-sm text-red-400">{{orderDetail.transport_name}}</span>
             </div>
           </div>
-          <div class="relative group" v-if="orderDetail.shipping_status !== 'delivered_to_the_customer' && !['returned','pending_delivery_to_store','pending_pay_back','success_pay_back'].includes(order.shipping_status)">
+
+          <div class="relative group" v-if="!['delivered_to_the_customer','returned','pending_delivery_to_store','pending_pay_back','success_pay_back','cancelled','auto_cancelled'].includes(orderDetail.shipping_status)">
             <span class="cursor-pointer"><i class="far fa-ellipsis text-2xl fm:text-lg"></i></span>
             <div class="absolute top-[1rem] hidden group-hover:block right-[-10rem] w-[12rem] bg-white p-3 rounded-lg shadow-lg">
               <div class="text-center" v-if="($store.state.user.access === 'admin')">
@@ -129,7 +130,7 @@
           <span class="text-gray-500 fm:text-sm">زمان تحویل</span>
           <span class="!font-medium fm:text-sm">زمان تقریبی تحویل از {{orderDetail.from_day}} تا {{orderDetail.to_day}} روز</span>
         </div>
-        <div class="flex fm:flex-col fm:gap-4 fd:justify-around">
+        <div class="flex fm:flex-col fm:gap-4 fd:justify-between">
           <div class="flex fm:flex-col fd:items-center gap-8">
             <div class="flex fm:justify-between items-center gap-2">
               <span class="text-gray-500 fm:text-sm">هزینه ارسال</span>
@@ -140,12 +141,6 @@
             <div class="flex fm:justify-between items-center gap-2">
               <span class="text-gray-500 fm:text-sm">مبلغ مرسوله</span>
               <span class="fm:text-sm !font-medium">{{orderDetail.amount}} ریال</span>
-            </div>
-          </div>
-          <div class="flex fm:flex-col fd:items-center gap-8">
-            <div class="flex fm:justify-between items-center gap-2">
-              <span class="text-gray-500 fm:text-sm">وضعیت</span>
-              <span class="fm:text-sm !font-medium" :style="{color:orderDetail.shipping_status_icon.color}">{{orderDetail.ir_shipping_status}}</span>
             </div>
           </div>
         </div>
@@ -165,6 +160,13 @@
               </div>
               <div class="flex flex-col gap-3">
                 <routerLink :to="{name:'ProductDetail', params:{slug:detail.product.slug}}" class="text-md !font-medium fm:text-sm">{{detail.product.ir_name}}</routerLink>
+
+                <div class="flex fm:flex-col fd:items-center gap-8">
+                  <div class="flex fm:justify-between items-center gap-2">
+                    <span class="text-gray-500 fm:text-sm">وضعیت</span>
+                    <span class="fm:text-sm !font-medium" :style="{color:orderDetail.shipping_status_icon.color}">{{orderDetail.ir_shipping_status}}</span>
+                  </div>
+                </div>
                 <div class="flex flex-col items-start justify-start gap-2">
                   <div class="flex items-center gap-2" v-if="detail.property_type === 'size'">
                     <span class="text-gray-500 text-lg fm:text-sm"><i class="far fa-ruler-vertical"></i></span>
@@ -192,10 +194,19 @@
                 </div>
               </div>
             </div>
-            <div class="flex items-end flex-start gap-1" @click="openCommentModal(detail.product.id)">
-              <span class="!text-blue-400 !border-none !bg-white fm:hidden">ثبت دیدگاه</span>
-              <span class="text-blue-400 text-sm"><i class="far fa-comment"></i></span>
+            <div class="flex flex-col justify-between items-center">
+              <div>
+                <div class="flex fm:justify-between items-center gap-2">
+                  <span class="text-gray-500 fm:text-sm">وضعیت:</span>
+                  <span class="fm:text-sm !font-medium" :style="{color:detail.shipping_status_icon.color}">{{detail.ir_shipping_status}}</span>
+                </div>
+              </div>
+              <div  @click="openCommentModal(detail.product.id)" class="flex fm:flex-col fd:items-center gap-2">
+                <span class="!text-blue-400 !border-none !bg-white fm:hidden">ثبت دیدگاه</span>
+                <span class="text-blue-400 text-sm"><i class="far fa-comment"></i></span>
+              </div>
             </div>
+
           </div>
           <div class="border-b border-gray-200 py-4 w-full" v-if="i < 5"></div>
         </div>

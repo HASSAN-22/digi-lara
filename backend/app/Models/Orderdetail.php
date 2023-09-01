@@ -43,4 +43,8 @@ class Orderdetail extends Model
     public function product(){
         return $this->belongsTo(Product::class);
     }
+
+    public function returned(){
+        return $this->hasOne(Returned::class);
+    }
 }

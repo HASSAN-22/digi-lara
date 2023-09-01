@@ -168,4 +168,5 @@ class User extends Authenticatable
     public function debtors(){
         return $this->hasMany(Debtor::class);
     }
+
 }

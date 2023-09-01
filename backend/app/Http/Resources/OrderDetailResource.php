@@ -34,6 +34,7 @@ class OrderDetailResource extends JsonResource
                 $orderDetail = $orderDetails[0];
                 $weightType = $orderDetail->product->category->weight_type;
                 $transport = $transports->where('weight_type',$weightType)->first();
+
                 $details[] = [
                     'id'=>$orderDetail->id,
                     'transport_name'=>$transport->name,
@@ -45,7 +46,11 @@ class OrderDetailResource extends JsonResource
                     'transport_cost'=>$transport ? $transport->fixed_price : 0,
                     'shipping_status_icon'=>ShippingEnum::getIcon($orderDetail['shipping_status']),
                     'ir_shipping_status'=>typeService($orderDetail['shipping_status'])->shippingStatus('fa')->get(),
-                    'data'=>$orderDetails,
+                    'data'=>$orderDetails->map(function($item){
+                        $item['shipping_status_icon'] = ShippingEnum::getIcon($item['shipping_status']);
+                        $item['ir_shipping_status'] = typeService($item['shipping_status'])->shippingStatus('fa')->get();
+                        return $item;
+                    }),
                 ];
                 $useReducedWallet = true;
             }

@@ -247,6 +247,7 @@ Route::group(['middleware'=>'auth:sanctum'],function (){
     });
 
     Route::controller(\App\Http\Controllers\Related\ReturnedController::class)->group(function(){
+        Route::get('returned/{order}','view');
         Route::post('returned','store');
         Route::post('returned-status/{returned}','updateStatus');
         Route::get('returned-problem/{returned}','orderProblem');

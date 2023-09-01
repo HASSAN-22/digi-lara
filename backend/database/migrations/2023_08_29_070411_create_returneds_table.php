@@ -14,10 +14,12 @@ return new class extends Migration
         Schema::create('returneds', function (Blueprint $table) {
             $table->id();
             $table->foreignId('order_id');
+            $table->foreignId('orderdetail_id');
             $table->text('description');
             $table->string('status');
             $table->timestamps();
             $table->foreign('order_id')->references('id')->on('orders')->onDelete('cascade')->onUpdate('cascade');
+            $table->foreign('orderdetail_id')->references('id')->on('orderdetails')->onDelete('cascade')->onUpdate('cascade');
         });
     }
 
