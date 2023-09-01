@@ -52,8 +52,7 @@ class Product extends Model
                 ->orWhere('price',$search)
                 ->orWhere('count',$search)
                 ->orWhere('sku','like',"%$search%")
-                ->orWhere('publish',$search)
-                ->orWhere('status',$search);
+                ->orWhere('publish',$search);
         }
         return $query;
     }
