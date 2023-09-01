@@ -82,8 +82,8 @@
         <div class="flex justify-between items-center">
           <div v-for="order in latestOrders" :key="order.id">
             <routerLink :to="{name:'ProductDetail', params:{slug:order.product.slug}}" class="flex flex-col gap-3 items-center border border-gray-100 hover:shadow p-3">
-              <div class="w-[75%]">
-                <img :src="$store.state.url + order.image" />
+              <div class="">
+                <img :src="$store.state.url + order.image" class="w-[55%]"/>
               </div>
               <span class="text-sm !font-medium">{{order.name}}</span>
               <span class="text-sm !font-medium">{{$store.getters.numberFormat(order.amount)}} ریال</span>

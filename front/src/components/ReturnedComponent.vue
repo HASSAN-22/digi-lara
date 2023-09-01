@@ -24,8 +24,8 @@
       </div>
       <div class="flex items-center gap-3">
         <span class="text-sm text-gray-500">{{item.created_at}}</span>
-        <span class="text-sm text-gray-500"><b>شماره سفارش</b> {{item.order_id}}</span>
-        <span class="text-sm text-gray-500"><b>شماره مرجوعی</b> {{item.id}}</span>
+        <span class="text-sm text-gray-500"><b>کد سفارش</b> {{item.order_id}}</span>
+        <span class="text-sm text-gray-500"><b>کد مرجوعی</b> {{item.id}}</span>
         <span class="text-sm text-gray-500"><b>قیمت</b> {{item.amount}}</span>
       </div>
     </div>

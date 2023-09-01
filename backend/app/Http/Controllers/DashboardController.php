@@ -8,6 +8,7 @@ use App\Enums\StatusEnum;
 use App\Enums\UserAccessEnum;
 use App\Models\Debtor;
 use App\Models\Order;
+use App\Models\Orderdetail;
 use App\Models\Product;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -39,14 +40,14 @@ class DashboardController extends Controller
             $latestOrders = (clone $orders)->get();
             $current = (clone $orders)->where('shipping_status',ShippingEnum::PAYMENT_PENDING)->count();
             $delivered = (clone $orders)->where('shipping_status',ShippingEnum::DELIVERED_CUSTOMER)->count();
-            $returned = (clone $orders)->where('shipping_status',ShippingEnum::RETURNED)->count();
+            $returned = Orderdetail::whereIn('order_id',(clone $orders)->get()->pluck('id'))->where('shipping_status',ShippingEnum::RETURNED)->count();
 
         }else{
             $userOrder = (clone $orders)->where('user_id',$user->id);
             $latestOrders = (clone $userOrder)->get();
             $current = (clone $userOrder)->where('shipping_status',ShippingEnum::PAYMENT_PENDING)->count();
             $delivered = (clone $userOrder)->where('shipping_status',ShippingEnum::DELIVERED_CUSTOMER)->count();
-            $returned = (clone $userOrder)->where('shipping_status',ShippingEnum::RETURNED)->count();
+            $returned = Orderdetail::whereIn('order_id',(clone $userOrder)->get()->pluck('id'))->where('shipping_status',ShippingEnum::RETURNED)->count();
         }
         $latestOrders = $latestOrders->map(fn($i)=>$i->orderDetails)->toArray();
         $latestOrders = call_user_func_array('array_merge', $latestOrders);
