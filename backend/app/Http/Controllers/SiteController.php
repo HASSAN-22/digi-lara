@@ -799,7 +799,7 @@ class SiteController extends Controller
      * @return \Illuminate\Contracts\Foundation\Application|\Illuminate\Contracts\Routing\ResponseFactory|\Illuminate\Foundation\Application|Response
      */
     public function getFaqs(string $slug){
-        $category = CategoryService::category()->active()->findBySlug($slug)->withRelations(['faqs'])->get();
+        $category = CategoryService::category()->active()->findBySlug($slug)->withRelations(['faqs'])->first();
         return response(['status'=>'success','data'=>$category]);
     }
 
@@ -886,7 +886,7 @@ class SiteController extends Controller
      */
     public function specialProduct(Request $request){
         $specialProduct = ProductService::product()->withRelations(['productComments'])->published()->activeSeller()
-            ->where(['amazing_price','!=',null])
+            ->whereNotNull('amazing_price')->where('amazing_offer_status','!=','yes')
             ->get()->map(function($item){
                 $item['rating'] = $this->calcProductRating($item->productComments)[1];
                 return $item->only('id','image','ir_name','count','price','amazing_price','amazing_offer_percent','slug','amazing_offer_status','amazing_offer_expire','rating');
@@ -935,7 +935,7 @@ class SiteController extends Controller
                 $widgets[$key]['products'] = ProductService::product()->published()->activeSeller()->findById(...array_column($widget['product_ids'], 'value'))->get(...$columns);
                 if ($widget['name'] == 'amazing_supermarket') {
                     $widgets[$key]['product_length'] = ProductService::product()->published()->activeSeller()->byCategory([$widget['category_id']['value']])->withRelations(['category'])->get()->count();
-                    $widgets[$key]['category'] = CategoryService::category()->findById($widget['category_id']['value'])->get('id','slug');
+                    $widgets[$key]['category'] = CategoryService::category()->findById($widget['category_id']['value'])->first('id','slug');
                 }
             } else if ($widget['name'] == 'shop_category') {
                 $widgets[$key]['categories'] = CategoryService::category()->findById(...array_column($widget['category_ids'], 'value'))->get('id', 'image', 'slug', 'title');
