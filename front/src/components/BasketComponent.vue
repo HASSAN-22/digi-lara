@@ -23,7 +23,7 @@
           <div class="flex justify-between items-center p-2">
             <div class="flex flex-col gap-2">
               <span class="text-gray-500 text-sm">مبلغ قابل پرداخت</span>
-              <span class="!font-bold text-lg">{{$store.getters.basketAmount($store.state.baskets)}} ریال</span>
+              <span class="!font-bold text-lg">{{$store.getters.getBasketAmount($store.state.baskets)}} ریال</span>
             </div>
             <routerLink :to="{name:'Basket'}" class="text-red-500 rounded bg-white p-2 border border-red-500">ثبت سفارش</routerLink>
           </div>

@@ -377,7 +377,7 @@ export default createStore({
         return true;
       }
     },
-    basketAmount: (state,getters) => (baskets,format=true) => {
+    getBasketAmount: (state,getters) => (baskets,format=true) => {
       let amount = 0;
       state.discounts = 0;
       baskets.map(item=>{

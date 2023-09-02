@@ -169,7 +169,7 @@ const calcTransportAmount = computed(()=>{
     let basket = baskets[i];
     let transport = transports.value.filter(item=>item.weight_type === basket.product.category.weight_type)[0];
     if(transport){
-      amount += transport.fixed_price !== null ? transport.fixed_price : 0;
+      amount += transport.fixed_price !== null ? parseInt(transport.fixed_price) : 0;
     }
   }
   return amount;
