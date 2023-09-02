@@ -271,7 +271,7 @@ watch(route, async ( current ) => {
 async function getData(_loading=true,page=1, sort=''){
   isFilter.value = false;
   loading.value = _loading;
-  let url = `${store.state.api}product-list/?page=${page}&slug=${slug.value}&sort=${sort}&only_available_products=${onlyAvailableProducts.value}`
+  let url = `${store.state.api}product-list?page=${page}&slug=${slug.value}&sort=${sort}&only_available_products=${onlyAvailableProducts.value}`
   if(colorSelected.value.length > 0){
     url+=makeQuery(colorSelected.value,'color');
   }else if(sizeSelected.value.length > 0){
