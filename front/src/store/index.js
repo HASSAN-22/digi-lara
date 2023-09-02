@@ -327,7 +327,8 @@ export default createStore({
     },
 
     getDiscount:(state,getters)=>(price, discount, numberFormat=true)=>{
-      price = price - ((discount / 100) * price);
+      price = parseInt(price)
+      price = price - ((parseInt(discount) / 100) * price);
       return numberFormat ? getters.numberFormat(price) : price;
     },
 
@@ -383,18 +384,18 @@ export default createStore({
       baskets.map(item=>{
         let product = item.product;
         if(item.product_size !== null){
-          amount += item.product_size.price
+          amount += parseInt(item.product_size.price)
         }else if(item.product_color !== null){
-          amount += item.product_color.price
+          amount += parseInt(item.product_color.price)
         }
         if(product.amazing_offer_status === 'yes'){
           amount += getters.getDiscount(product.price, product.amazing_offer_percent, false);
-        }else if(product.amazing_price !== null && product.amazing_price > 0){
-          amount += product.amazing_price;
+        }else if(product.amazing_price !== null && parseInt(product.amazing_price) > 0){
+          amount += parseInt(product.amazing_price);
         }else{
-          amount += product.price;
+          amount += parseInt(product.price);
         }
-        amount *= item.count;
+        amount *= parseInt(item.count);
       })
 
       return format ? getters.numberFormat(amount) : amount;
