@@ -143,6 +143,7 @@ class CategoryService
      * @return void
      */
     private static function filterNestedColumn(array $columns, string $relation, mixed $categoryData=null){
+        $columns = count($columns) > 0 ? $columns : ['*'];
         if($relation == 'children'){
             if(!empty($categoryData)){
                 foreach ($categoryData as $category){

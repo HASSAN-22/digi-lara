@@ -96,6 +96,9 @@
             </div>
           </div>
         </div>
+        <div class="mt-5">
+          <Input label="درصد تخفیف" v-model="percent" id="percent" placeholder="بین 1 تا 100"/>
+        </div>
       </div>
     </Modal>
 
@@ -153,6 +156,7 @@ let openModal = ref(null)
 let openUpdateModal = ref(null)
 let postId = ref(0);
 let status = ref('');
+let percent = ref('');
 
 onMounted(async()=>{
   await getData();
@@ -244,6 +248,7 @@ async function destroy(postId){
 function formData(){
   let _products = products.value.map(item=>item.value);
   return {
+    'percent':percent.value,
     'category_id':category.value['value'],
     'product_ids':JSON.stringify(_products),
   };
@@ -252,6 +257,7 @@ function formData(){
 function clearData(){
   category.value = {}
   products.value = []
+  percent.value = ''
   allProducts.value = []
   openModal.value.toggleModal();
 }

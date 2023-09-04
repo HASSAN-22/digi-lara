@@ -240,6 +240,7 @@ return [
         'shop_url'=>'لینک  بک اند فروشگاه',
         'shop_front_url'=>'لینک فرات فروشگاه',
         'comment_rule'=>'قوانین ثبت دیدگاه',
-        'problem_description'=>'توضیح مشکلات'
+        'problem_description'=>'توضیح مشکلات',
+        'percent'=>'درصد تخفیف'
     ],
 ];

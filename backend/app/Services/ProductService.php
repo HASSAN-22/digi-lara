@@ -105,7 +105,7 @@ class ProductService
      * @param array $categoryIds
      * @return ProductService
      */
-    public static function byCategory(array $categoryIds){
+    public static function findByCategoryIds(array $categoryIds){
         self::$query = self::$query->whereIn('category_id',$categoryIds);
         return new self();
     }

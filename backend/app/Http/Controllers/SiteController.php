@@ -390,7 +390,7 @@ class SiteController extends Controller
         $slug = $request->slug;
         $categoryIds = CategoryService::category()->active()->findBySlug($slug)->childrens('id')->pluck('id')->toArray();
         $category = CategoryService::category()->active()->findBySlug($slug)->first();
-        $query = ProductService::product()->published()->withRelations(['productComments'])->activeSeller()->byCategory($categoryIds);
+        $query = ProductService::product()->published()->withRelations(['productComments'])->activeSeller()->findByCategoryIds($categoryIds);
         $sort = $request->sort;
         if(!is_null($sort)){
             if($sort === 'top_visit'){
@@ -934,7 +934,7 @@ class SiteController extends Controller
             if (in_array($widget['name'], ['amazing_supermarket', 'amazing_offer'])) {
                 $widgets[$key]['products'] = ProductService::product()->published()->activeSeller()->findById(...array_column($widget['product_ids'], 'value'))->get(...$columns);
                 if ($widget['name'] == 'amazing_supermarket') {
-                    $widgets[$key]['product_length'] = ProductService::product()->published()->activeSeller()->byCategory([$widget['category_id']['value']])->withRelations(['category'])->get()->count();
+                    $widgets[$key]['product_length'] = ProductService::product()->published()->activeSeller()->findByCategoryIds([$widget['category_id']['value']])->withRelations(['category'])->get()->count();
                     $widgets[$key]['category'] = CategoryService::category()->findById($widget['category_id']['value'])->first('id','slug');
                 }
             } else if ($widget['name'] == 'shop_category') {

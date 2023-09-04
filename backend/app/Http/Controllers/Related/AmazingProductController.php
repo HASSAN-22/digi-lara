@@ -7,6 +7,8 @@ use App\Http\Controllers\Controller;
 use App\Http\Resources\AmazingProductResource;
 use App\Models\Category;
 use App\Models\Product;
+use App\Services\CategoryService;
+use App\Services\ProductService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rules\Enum;
@@ -39,13 +41,18 @@ class AmazingProductController extends Controller
         $this->authorize('createAmazingProduct',Product::class);
         $request['product_ids'] = json_decode($request->product_ids,true);
         $request->validate([
+           'percent'=>['required','numeric','between:1,100'],
            'product_ids'=>['required','array'],
            'product_ids.*'=>['required','numeric','exists:products,id'],
            'category_id'=>['required','numeric','exists:categories,id']
         ]);
         try{
             Product::whereIn('id',$request->product_ids)
-            ->update(['amazing_offer_status'=>StatusEnum::ACTIVE,'amazing_offer_expire'=>now()->addHours(24)->timestamp]);
+            ->update([
+                'amazing_offer_percent'=>$request->percent,
+                'amazing_offer_status'=>StatusEnum::ACTIVE,
+                'amazing_offer_expire'=>now()->addHours(24)->timestamp
+            ]);
             return response(['status'=>'success'],201);
         }catch (\Exception $e){
             return response(['status'=>'error','e'=>$e->getMessage()],500);
@@ -85,7 +92,9 @@ class AmazingProductController extends Controller
      */
     public function getProduct(Category $category){
         $this->authorize('viewAnyAmazingProduct',Product::class);
-        $products = $category->products()->where('amazing_offer_status',StatusEnum::PENDING->value)->get();
+        $categoryIds = CategoryService::category()->findById($category->id)->childrens('id')->map(fn($item)=>$item['id'])->toArray();
+        $products = ProductService::product()->findBy('category_id',...$categoryIds)
+            ->published()->activeSeller()->whereNull('amazing_offer_status')->orWhere('amazing_offer_status','!=',StatusEnum::ACTIVE->value)->get();
         return response(['status'=>'success','data'=>$products]);
     }
 }
