@@ -23,7 +23,7 @@ class ProductResource extends JsonResource
             'count'=>number_format($this->count),
             'image'=>$this->image,
             'amazing_offer_percent'=>(!is_null($this->amazing_offer_percent) and $this->amazing_offer_percent > 0) ? number_format($this->amazing_offer_percent) : null,
-            'amazing_offer_status'=>typeService($this->amazing_offer_status)->amazingOfferSatus('fa')->get() ?? '',
+            'amazing_offer_status'=>typeService($this->amazing_offer_status)->amazingOfferSatus('fa')->get() ?: '---',
             'publish'=>typeService($this->publish)->publish('fa')->get(),
             'sku'=>$this->sku,
         ];

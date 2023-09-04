@@ -120,6 +120,7 @@
               :permissions="[
               {id:1,label:'لیست کالاهای شگفت انگیز',perm:['view_any_amazing_products']},
               {id:2,label:'ثبت کالای شگفت انگیز',perm:['create_amazing_products']},
+              {id:3,label:'ویرایش وضعیت کالای شگفت انگیز',perm:['update_amazing_products']},
               {id:3,label:'حذف کالای شگفت انگیز',perm:['delete_amazing_products']},
               ]">
           </PermissionComponent>

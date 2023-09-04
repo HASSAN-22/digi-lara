@@ -6,6 +6,7 @@ use App\Models\User;
 use Illuminate\Database\Query\Builder;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class NotificationService
 {
@@ -44,7 +45,10 @@ class NotificationService
      * @param bool $toUser
      * @return void
      */
-    public static function send(int $postId, User|null $user, bool $toAdmin=true, bool $toUser=true):void{
+    public static function send(int $postId, User|null $user, bool $toAdmin=true, bool $toUser=true, $key=null):void{
+        if(!is_null($key)){
+            self::delete($postId, $key);
+        }
         if($user and $toUser){
             $user->notify(new self::$notificationName($postId));
         }
@@ -82,6 +86,9 @@ class NotificationService
      */
     public static function getUnRead(): Collection
     {
+        $query = str_replace(array('?'), array('\'%s\''), self::query()->toSql());
+        $query = vsprintf($query, self::query()->getBindings());
+        Log::info($query);
         return self::query()->whereNull('read_at')->get();
     }
 

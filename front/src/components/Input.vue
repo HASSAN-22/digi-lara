@@ -7,7 +7,8 @@
         </div>
         <input 
         :class="['border focus:outline-none p-2 p-1 w-full rounded-lg mb-1 text-sm', my_class]"
-        :type="type" 
+        :type="type"
+        :disabled="disabled"
         :v-model="modelValue" 
         :value="modelValue" 
         @input="$emit('update:modelValue', $event.target.value)" 
@@ -41,6 +42,10 @@ export default {
         required:{
             type:Boolean,
             default:true
+        },
+        disabled:{
+            type:Boolean,
+            default:false
         },
         label:String,
         id:String,

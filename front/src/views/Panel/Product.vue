@@ -36,7 +36,7 @@
                 </div>
               </Notification>
             </Td>
-            <Td v-if="$store.state.user.access === 'admin'" title="فروشنده" class="fm:text-sm">{{item.user}}</Td>
+            <Td v-if="isAdmin" title="فروشنده" class="fm:text-sm">{{item.user}}</Td>
             <Td title="تصویر" class="fm:text-sm w-[80px] h-[80px]"><img :src="$store.state.url + item.image" class="fm:mr-[5rem]" /></Td>
             <Td title="قیمت (ریال)" class="fm:text-sm flex flex-col">
               <div v-if="item.amazing_price !== null && item.amazing_price.length > 0" class="flex flex-col gap-1">
@@ -140,7 +140,7 @@
         </div>
         <div class="fd:w-[35%] flex flex-col gap-4">
           <div class="w-full bg-white shadow rounded py-4 px-2 flex flex-col gap-4">
-            <div v-if="$store.state.user.access === 'admin'">
+            <div v-if="isAdmin">
               <label class="fm:text-sm" for="sellerId"> فروشنده<b class="text-red-500 !font-bold">*</b></label>
               <select v-model="sellerId" class="fm:text-sm border border-gray-200 p-2 outline-none rounded-lg w-full">
                 <option value="" selected>--- انتخاب کنید ---</option>
@@ -334,10 +334,14 @@
               </select>
             </div>
             <div v-if="is_amazing_offer === 'yes'" class="w-full">
-              <div class="mb-5">
+              <div class="mb-5" v-if="!isAdmin">
+                <Input v-if="isUpdate && (amazingOfferStatus === 'pending' || amazingOfferStatus === null || amazingOfferStatus === 'no')" type="number" v-model="amazing_offer_percent" label="درصد تخفیف شگفت انگیز" placeholder="بین 0 - 100" alert="محاسبه قیمت براساس( قیمت اصلی - درصد تخفیف ) میباشد"/>
+                <Input v-else :disabled="true" type="number" v-model="amazing_offer_percent" label="درصد تخفیف شگفت انگیز" placeholder="بین 0 - 100" alert="محاسبه قیمت براساس( قیمت اصلی - درصد تخفیف ) میباشد"/>
+              </div>
+              <div class="mb-5" v-else>
                 <Input type="number" v-model="amazing_offer_percent" label="درصد تخفیف شگفت انگیز" placeholder="بین 0 - 100" alert="محاسبه قیمت براساس( قیمت اصلی - درصد تخفیف ) میباشد"/>
               </div>
-              <div v-if="isUpdate" class="flex gap-2 items-center">
+              <div v-if="isUpdate && isAdmin" class="flex gap-2 items-center">
                 <label for="amazing_offer_update">
                   به روز رسانی انقضاء
                 </label>
@@ -346,7 +350,7 @@
             </div>
           </div>
 
-          <div class="w-full bg-white shadow rounded py-4 px-2 flex flex-col gap-4" v-if="$store.state.user.access === 'admin'">
+          <div class="w-full bg-white shadow rounded py-4 px-2 flex flex-col gap-4" v-if="isAdmin">
             <label class="fm:text-sm" for="publish">وضعیت<b class="text-red-500 !font-bold">*</b></label>
             <select v-model="publish" class="fm:text-sm border border-gray-200 p-2 outline-none rounded-lg w-full">
               <option value="published">انتشار</option>
@@ -388,6 +392,7 @@ import Toast from "@/plugins/toast";
 import Multiselect from '@vueform/multiselect'
 
 
+let isAdmin = ref(store.state.user.access === 'admin')
 let refresh = ref(false)
 let btnLoading = ref(false)
 let loading = ref(false)
@@ -406,6 +411,7 @@ let sku = ref('')
 let price = ref('')
 let is_amazing_offer = ref('no')
 let amazing_offer_percent = ref('')
+let amazingOfferStatus = ref('')
 let amazing_price = ref('')
 let packing_length = ref('')
 let packing_width = ref('')
@@ -619,7 +625,7 @@ async function show(_postId){
     physical_width.value = data.physical_width
     physical_height.value = data.physical_height
     physical_weight.value = data.physical_weight
-    if(store.state.user.access === 'admin'){
+    if(isAdmin.value){
       publish.value = data.publish
     }
     count.value = data.count
@@ -628,12 +634,13 @@ async function show(_postId){
     description.value = data.description
     weakPoints.value = JSON.parse(data.weak_points)
     strengths.value = JSON.parse(data.strengths)
-    if(data.amazing_offer_percent !== null){
-      amazing_offer_percent.value = data.amazing_offer_percent
+    amazingOfferStatus.value = data.amazing_offer_status
+    amazing_offer_percent.value = data.amazing_offer_percent === null ? '' : data.amazing_offer_percent;
+    if(['yes','pending'].includes(data.amazing_offer_status)){
       is_amazing_offer.value = 'yes'
     }
 
-    await getProperties(false)
+    await getProperties(true)
 
     colorCount.value = data.product_colors.length;
     data.product_colors.map(item=>{
@@ -659,7 +666,7 @@ async function show(_postId){
 
     // Set format values `propertyTypeIds` fro `vueSelect`
     for(let i = 0; i < propertyIds.value.length; i++){
-      await getPropertyType({target:{value:propertyIds.value[i]}},i,false)
+      await getPropertyType({target:{value:propertyIds.value[i]}},i,true)
       let properties = data.product_properties.filter(item=>item.property_id === propertyIds.value[i]);
       if(properties.length > 0){
         propertyTypeIds.value[i] = properties.map(property=>{

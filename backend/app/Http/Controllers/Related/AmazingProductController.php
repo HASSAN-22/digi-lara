@@ -4,10 +4,12 @@ namespace App\Http\Controllers\Related;
 
 use App\Enums\StatusEnum;
 use App\Http\Controllers\Controller;
+use App\Http\Resources\AmazingProductResource;
 use App\Models\Category;
 use App\Models\Product;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\Rules\Enum;
 
 class AmazingProductController extends Controller
 {
@@ -27,10 +29,10 @@ class AmazingProductController extends Controller
         }
         $query = $user->isSeller() ? $query->where('user_id', $user->id) : $query;
 
-        $products =$query->select(['id', 'ir_name','image','sku','amazing_offer_percent'])
-            ->where('amazing_offer_status',StatusEnum::ACTIVE->value)
+        $products =$query->select(['id', 'ir_name','image','sku','amazing_offer_percent','amazing_offer_status','updated_at'])
+            ->whereNotNull('amazing_offer_status')
             ->paginate(10);
-        return response(['status'=>'success','data'=>['categories'=>$categories,'products'=>$products]]);
+        return AmazingProductResource::collection($products)->additional(['categories'=>$categories]);
     }
 
     public function store(Request $request){
@@ -50,6 +52,18 @@ class AmazingProductController extends Controller
         }
     }
 
+    public function update(Request $request, Product $product){
+        $this->authorize('deleteAmazingProduct',$product);
+        $request->validate(['status'=>['required','string','max:255',new Enum(StatusEnum::class)]]);
+        $product->amazing_offer_status = StatusEnum::from($request->status);
+        if($request->status == StatusEnum::ACTIVE->value){
+            $product->amazing_offer_expire = now()->addHours(24)->timestamp;
+        }else{
+            $product->amazing_offer_expire = null;
+        }
+        return $product->save() ? response(['status'=>'success'],201) : response(['status'=>'error'],500);
+    }
+
     /**
      * Undo from amazing mode
      * @param Product $product
@@ -59,7 +73,7 @@ class AmazingProductController extends Controller
     public function destroy(Product $product){
         $user = auth()->user();
         $this->authorize($user->isAdmin() ? 'deleteAmazingProduct' : 'deleteSellerAmazingProduct',$product);
-        $products = $product->update(['amazing_offer_status'=>null,'amazing_offer_percent'=>null]);
+        $products = $product->update(['amazing_offer_status'=>null,'amazing_offer_percent'=>null,'amazing_offer_expire'=>null]);
         return $products ? response(['status'=>'success']) : response(['status'=>'error'],500);
     }
 

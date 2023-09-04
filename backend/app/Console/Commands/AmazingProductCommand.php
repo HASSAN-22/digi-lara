@@ -32,7 +32,7 @@ class AmazingProductCommand extends Command
         $products = Product::where('amazing_offer_status',StatusEnum::ACTIVE->value)
             ->whereDate('updated_at','<',now()->subHours(24))->get();
 
-        $products->map(fn($item)=>$item->update(['amazing_offer_status'=>null,'amazing_offer_percent'=>null]));
+        $products->map(fn($item)=>$item->update(['amazing_offer_status'=>null,'amazing_offer_percent'=>null,'amazing_offer_expire'=>null]));
 
         echo "[+] Disable " . $products->count() . " amazing offer products.";
 

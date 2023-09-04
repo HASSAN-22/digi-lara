@@ -120,7 +120,7 @@ class TicketController extends Controller
             $currentUser = auth()->user();
             $isAdmin = $currentUser->isAdmin();
             $user = !$isAdmin ? null : $ticket->user;
-            NotificationService::name('TicketNotification')->send($ticket->id,$user,!$isAdmin,$isAdmin);
+            NotificationService::name('TicketNotification')->send($ticket->id,$user,!$isAdmin,$isAdmin,'data->ticket->id');
         }catch (\Exception $e){}
         return $ticketMessage ? response(['status'=>'success'],201) : response(['status'=>'error'],500);
 

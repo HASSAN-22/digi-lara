@@ -230,6 +230,7 @@ Route::group(['middleware'=>'auth:sanctum'],function (){
         Route::get('amazing_product/get-product/{category}','getProduct');
         Route::get('amazing_product','index');
         Route::post('amazing_product','store');
+        Route::patch('amazing_product/{product}','update');
         Route::delete('amazing_product/{product}','destroy');
     });
 

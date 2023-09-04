@@ -40,9 +40,7 @@ class ProductController extends Controller
     {
         $user = auth()->user();
         $query = Product::latest()->search()->with(['user'=>fn($q)=>$q->select('id','name')]);
-        $notificationQuery = NotificationService::name('ProductNotification')->forUser((int)$user->id);
-        $notifications = clone($notificationQuery)->getUnRead();
-        clone($notificationQuery)->read();
+        $notifications = NotificationService::name('ProductNotification')->forUser((int)$user->id)->getUnRead();
         if($user->isAdmin()){
             $this->authorize('viewAny',Product::class);
         }else{
@@ -81,9 +79,14 @@ class ProductController extends Controller
 
             // Upload original product image
             $path = $this->uploadMainImage($request);
+            $productData = $this->productData($user, $request, $path);
 
+            if($request->amazing_offer_percent > 0 and $request->is_amazing_offer == 'yes'){
+                $productData['amazing_offer_status']= $user->isAdmin() ? StatusEnum::ACTIVE : StatusEnum::PENDING;
+                $productData['amazing_offer_expire']= $user->isAdmin() ? now()->addHours(24)->timestamp : null;
+            }
             // Insert product
-            $product = Product::create($this->productData($user, $request, $path));
+            $product = Product::create($productData);
 
             // Upload other product image
             if($request->hasFile('images')){
@@ -135,6 +138,9 @@ class ProductController extends Controller
             'productSpecifications',
             'category'=>fn($q)=>$q->select('id','commission')
         ])->first();
+        try{
+            NotificationService::name('ProductNotification')->delete((int)$product->id, 'data->product->id');
+        }catch (\Exception $e){}
         return response(['status'=>'success','data'=>$product]);
     }
 
@@ -148,20 +154,39 @@ class ProductController extends Controller
         $this->authorize($user->isAdmin() ? 'update' : 'updateSeller',$product);
         DB::beginTransaction();
         try{
+            $notification = NotificationService::name('ProductNotification');
+
             // Upload original product image and remove previous image
             $path = $product->image;
             if($request->hasFile('image')){
                 $path = $this->uploadMainImage($request);
-                $this->removeOriginalImage($product->image, $product->sku);
+                $this->removeOriginalImage($product->image);
             }
             // Update product
             $productData = $this->productData($user, $request,$path);
+            $emptyAmazingOffer = function ()use(&$productData){
+                $productData['amazing_offer_status'] = null;
+                $productData['amazing_offer_expire'] = null;
+                $productData['amazing_offer_percent'] = null;
+            };
+
             if($user->isSeller()){
-                $productData['amazing_offer_status'] = $product->amazing_offer_status;
-                $productData['amazing_offer_expire'] = $product->amazing_offer_expire;
-            }
-            if($user->isAdmin() and !$request->amazing_offer_update){
-                $productData['amazing_offer_expire'] = $product->amazing_offer_expire;
+                if($request->amazing_offer_percent > 0 and $request->is_amazing_offer == 'yes' and $product->amazing_offer_status !== 'yes'){
+                    $productData['amazing_offer_status']= StatusEnum::PENDING;
+                }elseif($product->amazing_offer_status == 'yes' and $request->is_amazing_offer == 'yes'){
+                    $productData['amazing_offer_percent'] = $product->amazing_offer_percent;
+                }else{
+                    $emptyAmazingOffer();
+                }
+                $notification->send((int)$product->id,null,true,false,'data->product->id');
+            }elseif($user->isAdmin()){
+                if($request->is_amazing_offer == 'no' or $request->amazing_offer_percent <= 0){
+                    $emptyAmazingOffer();
+                }elseif($request->amazing_offer_update){
+                    $productData['amazing_offer_status'] = StatusEnum::ACTIVE;
+                    $productData['amazing_offer_expire'] = now()->addHours(24)->timestamp;
+                }
+                $notification->send((int)$product->id,$product->user,false,true, 'data->product->id');
             }
             $product->update($productData);
 
@@ -193,12 +218,7 @@ class ProductController extends Controller
             if($request->price != $product->price){
                 Productpricehistory::create(['product_id'=>$product->id,'price'=>$product->price]);
             }
-            $notification = NotificationService::name('ProductNotification');
-            if($user->isSeller()){
-                $notification->send((int)$product->id,null,true,false);
-            }else{
-                $notification->send((int)$product->id,$user,false);
-            }
+
 
             DB::commit();
             return response(['status'=>'success'],201);
@@ -419,13 +439,15 @@ class ProductController extends Controller
             'more_description' => $request->more_description,
         ];
 
-        if(($user->isAdmin() and !is_null($request->amazing_offer_percent))){
-            $data['amazing_offer_status']= StatusEnum::ACTIVE;
-            $data['amazing_offer_expire']= now()->addHours(24)->timestamp;
-        }else{
-            $data['amazing_offer_status']= StatusEnum::PENDING;
-            $data['amazing_offer_expire']= null;
-        }
+//        if($user->isAdmin()){
+//            if(!is_null($request->amazing_offer_percent) and $request->is_amazing_offer == 'yes'){
+//                $data['amazing_offer_status']= StatusEnum::ACTIVE;
+//                $data['amazing_offer_expire']= now()->addHours(24)->timestamp;
+//            }
+//        }else{
+//            $data['amazing_offer_status']= StatusEnum::PENDING;
+//            $data['amazing_offer_expire']= null;
+//        }
 
 
         return $data;

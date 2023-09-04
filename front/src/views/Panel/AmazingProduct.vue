@@ -4,9 +4,9 @@
       <span class="!font-medium text-lg">لیست کالاهای شگفت انگیز</span>
     </div>
     <div class="mt-10 px-3 mb-3">
-      <div :class="['mb-3 mr-2 flex justify-between fm:flex-col items-center', $store.state.user.access === 'seller' ? 'justify-end' : '']">
-        <div class="flex gap-2 items-center" v-if="$store.state.user.access === 'admin'">
-          <UserCanAction action="create" @create="create()" permission="create_amazing_products" />
+      <div :class="['mb-3 mr-2 flex justify-between fm:flex-col items-center']">
+        <div class="flex gap-2 items-center" >
+          <UserCanAction v-if="isAdmin" action="create" @create="create()" permission="create_amazing_products" />
           <Button @click="getData(false, 1, true)" my_class="!bg-white !py-2 !px-2" :btnLoading="refresh"><i class="far fa-sync text-2xl fm:text-lg text-gray-700"></i></Button>
         </div>
         <div class="ml-2 fm:mt-3">
@@ -20,6 +20,8 @@
               'نام کالا',
               'درصد شگفت انگیز',
               'تصویر',
+              'وضعیت',
+              'تاریخ ثبت',
               'عملیات'
               ]" />
           <tbody class="block lg:table-row-group xl:table-row-group 2xl:table-row-group md:table-row-group">
@@ -30,11 +32,17 @@
                 <span class="text-xs text-gray-400">شناسه: {{item.sku}}</span>
               </div>
             </Td>
-            <Td title="درصد شگفت انگیز" class="fm:text-sm w-[80px] h-[80px]">{{item.amazing_offer_percent}}%</Td>
+            <Td title="درصد شگفت انگیز" class="fm:text-sm w-[80px] h-[80px]">{{item.amazing_offer_percent}}</Td>
             <Td title="تصویر" class="fm:text-sm w-[80px] h-[80px]"><img :src="$store.state.url + item.image" class="fm:mr-[5rem]" /></Td>
+            <Td title="وضعیت" class="fm:text-sm">{{item.ir_status}}</Td>
+            <Td title="تاریخ ثبت" class="fm:text-sm">{{item.updated_at}}</Td>
             <Td title="عملیات">
-              <div class="flex items-center justify-center gap-2">
-                <UserCanAction action="destroy" @destroy="destroy(item.id)" permission="update_amazing_products" :postId="item.id" />
+              <div class="flex items-center justify-center gap-2" v-if="isAdmin">
+                <UserCanAction action="show" @show="show(item.id,item.status)" permission="update_amazing_products" :postId="item.id" />
+                <UserCanAction  action="destroy" @destroy="destroy(item.id)" permission="delete_amazing_products" :postId="item.id" />
+              </div>
+              <div class="flex items-center justify-center gap-2" v-else>
+                <Button my_class="!bg-white border border-red-500 !py-2 !px-2 fm:py-1 fm:px-1" @click="destroy(item.id)"><i class="far fm:text-sm fa-trash text-red-500"></i></Button>
               </div>
             </Td>
           </tr>
@@ -90,6 +98,18 @@
         </div>
       </div>
     </Modal>
+
+    <Modal title="ویرایش وضعیت کالای شگفت انگیز" save="ثبت تغییرات" :permission="'update_amazing_products'" :btnLoading="btnLoading" @callback="update()" ref="openUpdateModal">
+      <div class="mb-5 w-full">
+        <label class="fm:text-sm" for="status">وضعیت<b class="text-red-500 !font-bold">*</b></label>
+        <select v-model="status" id="status" class="fm:text-sm border border-gray-200 p-2 outline-none rounded-lg w-full">
+          <option value="" selected disabled>--- انتخاب کنید ---</option>
+          <option value="yes">تایید</option>
+          <option value="no">رد</option>
+          <option value="pending">در حال بررسی</option>
+        </select>
+      </div>
+    </Modal>
     <Meta :title="$store.state.siteName + ` | لیست کالاهای شگفت انگیز `"/>
     <Loading :loading="loading" />
     <ValidationError />
@@ -118,6 +138,7 @@ import Toast from "@/plugins/toast";
 import Multiselect from '@vueform/multiselect'
 
 
+let isAdmin = ref(store.state.user.access === 'admin')
 let refresh = ref(false)
 let btnLoading = ref(false)
 let loading = ref(false)
@@ -129,6 +150,9 @@ let products = ref([])
 let allProducts = ref([])
 let allData = ref([])
 let openModal = ref(null)
+let openUpdateModal = ref(null)
+let postId = ref(0);
+let status = ref('');
 
 onMounted(async()=>{
   await getData();
@@ -141,12 +165,12 @@ async function getData(_loading = true,page=1, isRefresh=false){
   refresh.value = true;
   loading.value = _loading;
   await axios.get(`${store.state.api}${model.value}?page=${page}&search=${search.value}`).then(resp=>{
-    let data = resp.data.data;
+    let data = resp.data;
+    allData.value = data.data;
     allCategories.value = data.categories.map(item=>{
       return {value:item.id, label:item.title}
     });
-    allData.value = data.products.data;
-    store.commit('paginate',data.products);
+    store.commit('paginate',data.meta);
   }).catch(err=>{
     store.commit('handleError',err)
   })
@@ -190,6 +214,24 @@ async function insert(){
   btnLoading.value = false;
 }
 
+
+async function show(_postId, _status){
+  postId.value = _postId;
+  status.value = _status;
+  openUpdateModal.value.toggleModal();
+}
+
+async function update(){
+  btnLoading.value =  true;
+  await axios.patch(`${store.state.api}${model.value}/${postId.value}`,{status:status.value}).then(resp=>{
+    Toast.success("تغییرات با موفقیت تغییر یافت");
+    getData(false,store.state.current)
+    openUpdateModal.value.toggleModal();
+  }).catch(err=>{
+    store.commit('handleError',err)
+  })
+  btnLoading.value =  false;
+}
 async function destroy(postId){
   loading.value = false;
   await store.dispatch('deleteRecord',[`${model.value}/${postId}`,'دقت کنید در صورت تایید این ایتم از لیست شگفت انکیز خارج میشود'])

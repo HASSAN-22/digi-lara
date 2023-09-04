@@ -486,12 +486,15 @@ class TypeService
         if($lang == 'fa'){
             $this->data = match ($this->data){
                 StatusEnum::ACTIVE->value => 'بله',
-                default =>  'خیر',
+                StatusEnum::PENDING->value => 'در حال بررسی',
+                StatusEnum::DEACTIVATED->value => 'خیر',
+                default => $this->data,
             };
         }else{
             $this->data = match ($this->data){
                 'بله'=>StatusEnum::ACTIVE->value,
-                'خیر'=>StatusEnum::DEACTIVATED->value || StatusEnum::PENDING->value,
+                'خیر'=>StatusEnum::DEACTIVATED->value,
+                'در حال بررسی'=>StatusEnum::PENDING->value,
                 default => $this->data,
             };
         }
