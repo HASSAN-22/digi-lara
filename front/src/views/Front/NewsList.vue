@@ -80,8 +80,8 @@ onMounted(async ()=>{
 })
 
 watch(route, async ( current ) => {
-  slug.value = current.params['slug'];
   if(current.name === 'NewsList'){
+    slug.value = current.params['slug'];
     await getData()
   }
 })

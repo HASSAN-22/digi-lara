@@ -41,8 +41,8 @@ onMounted(async ()=>{
 
 
 watch(route, async ( current ) => {
-  postId.value = current.params['id'];
   if(current.name === 'PageDetail'){
+    postId.value = current.params['id'];
     await getFaqs()
   }
 })

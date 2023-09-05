@@ -28,8 +28,8 @@
             <span class="text-lg !font-medium">{{product.ir_name}}</span>
           </div>
         </div>
-        <div class="flex fm:flex-col gap-2">
-          <div class="flex w-[33%] fm:flex-col fm:gap-4 fm:w-[100%]">
+        <div :class="['flex fm:flex-col gap-2',showMoreProperty ? '' : 'items-end']">
+          <div class="flex w-[35%] fm:flex-col fm:gap-4 fm:w-[100%] fd:gap-3">
             <ul class="flex flex-col fm:flex-row fm:items-center fm:gap-8 fd:space-y-8">
               <li class="cursor-pointer">
                 <span data-title="اضافه به علاقه مندی" @click="toggleWishlist()">
@@ -150,7 +150,7 @@
                   <span class="!font-medium">{{_properties.map(item=>item.property_type.name).join(', ')}}</span>
                 </li>
               </ul>
-              <div class="mt-5 text-blue-400 text-sm">
+              <div class="mt-5 text-blue-400 text-sm" v-if="Object.values(properties).length > 4">
                 <span @click="showMoreProperty=!showMoreProperty" class="cursor-pointer">مشاهده {{showMoreProperty ? 'کمتر' : 'بیشتر'}}</span>
               </div>
             </div>
@@ -162,7 +162,7 @@
               </div>
             </div>
           </div>
-          <div class="flex w-[33%] fm:w-[100%] h-full mt-10">
+          <div class="flex w-[31%] fm:w-[100%] h-full mt-10">
             <div class="border border-gray-200 rounded-lg fd:bg-gray-100 p-6  w-full">
               <div class="flex flex-col h-full gap-4" v-if="product.count > 0">
                 <div class="flex flex-col gap-8 border-b border-gray-300 pb-4">
@@ -234,27 +234,33 @@
           </div>
         </div>
 
-        <div class="border border-gray-200 rounded-lg p-2 mt-12">
+        <div class="border border-gray-200 rounded-lg p-2 mt-12 h-full">
           <div>
             <span class="border-b-2 border-red-500 text-lg !font-medium">کالاهای مشابه</span>
           </div>
-          <div>
+          <div class="h-full">
             <Slider :slides="(displaySize < 769) ? 2 : 5">
               <SwiperSlide v-for="product in relatedProducts" :key="product.id">
-                <div class="flex flex-col gap-2 border-l border-gray-200 p-2">
-                  <routerLink :to="{name:'ProductDetail', params:{slug:product.slug}}" class="flex justify-center">
-                    <img :src="$store.state.url + product.image.replace(`${$store.state.largeSize}x${$store.state.largeSize}_`,`${$store.state.smallSize}x${$store.state.smallSize}_`)" class="fd:w-[150px] fd:h-[150px]"/>
-                  </routerLink>
-                  <routerLink :to="{name:'ProductDetail', params:{slug:product.slug}}" class="fm:text-sm">
-                    <h5>{{product.ir_name}}</h5>
-                  </routerLink>
-                  <span class="text-sm text-red-400" v-if="product.count <= 3">تنها {{product.count}} عدد در انبار باقی مانده</span>
+                <div class="flex flex-col h-[19rem] justify-between gap-2 border-l border-gray-200 p-2">
+                  <div>
+                    <routerLink :to="{name:'ProductDetail', params:{slug:product.slug}}" class="flex justify-center">
+                      <img :src="$store.state.url + product.image.replace(`${$store.state.largeSize}x${$store.state.largeSize}_`,`${$store.state.smallSize}x${$store.state.smallSize}_`)" class="fd:w-[150px] fd:h-[150px]"/>
+                    </routerLink>
+                  </div>
+                  <div>
+                    <routerLink :to="{name:'ProductDetail', params:{slug:product.slug}}" class="fm:text-sm">
+                      <h5>{{product.ir_name}}</h5>
+                    </routerLink>
+                  </div>
+                  <div>
+                    <span class="text-sm text-red-400" v-if="product.count <= 3">تنها {{product.count}} عدد در انبار باقی مانده</span>
+                  </div>
                   <div class="flex justify-between">
                     <div>
                       <span v-if="product.amazing_offer_status === 'yes'" class="bg-red-500 text-white rounded-lg px-2 fm:px-1 py-[1px] text-sm">{{product.amazing_offer_percent}}%</span>
                     </div>
                     <div class="flex flex-col gap-2">
-                      <div class="flex flex-col gap-1" v-if="(product.amazing_price !== null && product.amazing_price > 0) && product.amazing_offer_status !== 'yes'">
+                      <div class="flex flex-col gap-1" v-if="product.amazing_price !== null && product.amazing_offer_status !== 'yes'">
                         <span class="!font-medium fm:text-sm">{{$store.getters.numberFormat(product.amazing_price)}} ریال</span>
                         <span class="!font-medium text-xs text-gray-500"><del>{{$store.getters.numberFormat(product.price)}} ریال</del></span>
                       </div>
@@ -263,7 +269,7 @@
                         <span class="!font-medium text-xs text-gray-500"><del>{{$store.getters.numberFormat(product.price)}} ریال</del></span>
                       </div>
                       <div class="flex flex-col gap-1" v-else>
-                        <span class="!font-medium text-xs text-gray-500"><del>{{$store.getters.numberFormat(product.price)}} ریال</del></span>
+                        <span class="!font-medium fm:text-sm">{{$store.getters.numberFormat(product.price)}} ریال</span>
                       </div>
                     </div>
                   </div>
@@ -769,10 +775,10 @@ onMounted(async () => {
 })
 
 watch(route, async ( current ) => {
-  slug.value = current.params['slug'];
   store.state.searchModal = false;
   store.state.searchText = '';
   if(current.name === 'ProductDetail'){
+    slug.value = current.params['slug'];
     await getData()
     await getUserData();
   }
@@ -821,7 +827,7 @@ async function getData(_loading=true){
     // Create chart line data
     chartData();
 
-  })
+  }).catch(err=>{})
   loading.value = false;
 }
 

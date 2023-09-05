@@ -60,9 +60,7 @@ class SiteController extends Controller
         $sliders = Slider::get();
         $widgets = Widget::where('page','root')->first();
         $widgets = $this->getWidgets($widgets);
-        $bestSellingProducts = ProductService::product()->published()->activeSeller()->bestsellings()->get('id','ir_name','image','slug');
-        $half = ceil($bestSellingProducts->count() / 3);
-        $bestSellingProducts = $bestSellingProducts->chunk($half);
+        $bestSellingProducts = ProductService::product()->published()->activeSeller()->bestsellings()->get('id','ir_name','image','slug')->take(12);
         $news = News::where('publish',PublishEnum::PUBLISHED)->latest()->get(['id','title','image','slug'])->take(4);
         return response(['status'=>'success','data'=>['sliders'=>$sliders,'widgets'=>$widgets,'best_selling_products'=>$bestSellingProducts,'news'=>$news]]);
     }
@@ -378,7 +376,7 @@ class SiteController extends Controller
      * @return Response
      */
     public function searchProduct(Request $request){
-        $products = ProductService::product()->published()->activeSeller()->where(['ir_name','like',"%{$request->search}%"])->get(['id','ir_name','slug','price','slug','image']);
+        $products = ProductService::product()->published()->activeSeller()->where(['ir_name','like',"%{$request->search}%"])->get('id','ir_name','slug','price','slug','image');
         return response(['status'=>'success','data'=>$products]);
     }
 

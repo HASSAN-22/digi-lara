@@ -58,22 +58,21 @@
             </div>
           </div>
 
-          <div class="expensive">
-            <Slider :slides="(displaySize < 769) ? 1 : 4" v-for="j in 3" :key="j">
-              <SwiperSlide v-for="(item,index) in bestSellingProducts[j-1]" :key="item.id">
-                <routerLink :to="{name:'ProductDetail', params:{slug:item.slug}}" :class="['flex items-center justify-between gap-3', j !== 3 ? 'border-b border-gray-200 mb-8' : '']">
-                  <div>
-                    <span class="text-2xl !font-extrabold text-blue-400">{{(parseInt(index)+1)}}</span>
-                  </div>
-                  <div class="flex flex-col gap-2">
-                    <span class="text-sm text-">{{item.ir_name}}</span>
-                  </div>
-                  <div class="w-[30%]">
-                    <img :src="$store.state.url + item.image" class="rounded"/>
-                  </div>
-                </routerLink>
-              </SwiperSlide>
-            </Slider>
+          <div class="expensive mt-8">
+            <div class="flex flex-wrap gap-4 justify-around">
+              <routerLink :to="{name:'ProductDetail', params:{slug:item.slug}}" :class="['w-[25%] flex items-center justify-between gap-3 border-b border-gray-200 mb-8']" v-for="(item,index) in bestSellingProducts" :key="item.id">
+                <div class="w-[30%]">
+                  <img :src="$store.state.url + item.image" class="rounded"/>
+                </div>
+                <div>
+                  <span class="text-2xl !font-extrabold text-blue-400">{{(parseInt(index)+1)}}</span>
+                </div>
+                <div class="flex flex-col gap-2">
+                  <span class="text-sm text-">{{item.ir_name}}</span>
+                </div>
+
+              </routerLink>
+            </div>
           </div>
         </div>
 

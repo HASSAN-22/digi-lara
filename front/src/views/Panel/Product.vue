@@ -8,6 +8,7 @@
         <div class="flex gap-2 items-center">
           <UserCanAction action="create" @create="create()" permission="create_products" />
           <Button @click="getData(false, 1, true)" my_class="!bg-white !py-2 !px-2" :btnLoading="refresh"><i class="far fa-sync text-2xl fm:text-lg text-gray-700"></i></Button>
+          <Button text="ایمپورت کردن کالا" @click="showImport()" my_class="!bg-white !border !border-blue-400 !text-blue-400 !py-2 !px-2"></Button>
         </div>
         <div class="ml-2 fm:mt-3">
           <Input type="search" v-debounce="searchData" :debounce-events="['keydown']" id="search" placeholder="جستجو: متن خود را وارد کنید" :required="false" />
@@ -360,6 +361,26 @@
         </div>
       </div>
     </Modal>
+
+    <Modal title="ایمپورت کردن کالا" save="ایمپورت"  :btnLoading="importLoading" @callback="importProduct()" ref="importModal">
+      <div class="mb-8 flex flex-col gap-8">
+        <div class="flex items-center gap-2">
+          <span class="fm:text-sm">نمونه فایل:</span>
+          <a :href="`${$store.state.url}/product.xlsx`" target="_blank" class="text-blue-400 fm:text-sm">دانلود</a>
+        </div>
+        <ul class="flex items-center gap-10">
+          <li class="flex items-center gap-2 text-green-500">
+            <span class="fm:text-sm">موفق:</span>
+            <span class="fm:text-sm">{{importSuccess}}</span>
+          </li>
+          <li class="flex items-center gap-2 text-red-500">
+            <span class="fm:text-sm">خطا:</span>
+            <span class="fm:text-sm">{{importError}}</span>
+          </li>
+        </ul>
+      </div>
+      <Input :key="importFileKey" type="file" label="انتخاب فایل" @change="getImportFile($event)" id="importFile" alert="فرمت مجاز: xlsx,xls" />
+    </Modal>
     <Meta :title="$store.state.siteName + ` | لیست ویژگی ها `"/>
     <Loading :loading="loading" />
     <ValidationError />
@@ -400,6 +421,12 @@ let isUpdate = ref(false)
 let postId = ref(null)
 let model = ref('product')
 let search = ref('')
+let importModal = ref(null);
+let importLoading = ref(false);
+let importFile = ref('');
+let importFileKey = ref(0);
+let importSuccess = ref(0);
+let importError = ref(0);
 
 let sellerId = ref('')
 let brandId = ref('')
@@ -569,6 +596,28 @@ function searchData(text){
   getData(false)
 }
 
+function showImport(){
+  importFile.value = '';
+  importLoading.value = false;
+  importSuccess.value = 0;
+  importError.value = 0;
+  importModal.value.toggleModal();
+}
+
+async function importProduct(){
+  importLoading.value = true;
+  let frm = new FormData();
+  frm.append('import_file',importFile.value);
+  await axios.post(`${store.state.api}${model.value}/import`,frm).then(resp=>{
+    let data = resp.data.data;
+    importSuccess.value = data.success;
+    importError.value = data.error;
+    importFile.value = '';
+  }).catch(err=>{
+    store.commit('handleError',err)
+  })
+  importLoading.value = false;
+}
 function create(){
   clearData();
 }
@@ -911,6 +960,11 @@ function getFile(event, index, isOriginalImage=false){
     previewImages.value[index] = URL.createObjectURL(images.value[index]);
     imageKeys.value[index]++;
   }
+}
+
+function getImportFile(event){
+  importFile.value = event.target.files[0];
+  importFileKey.value ++;
 }
 
 </script>

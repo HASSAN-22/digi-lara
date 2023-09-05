@@ -12,7 +12,7 @@
           </div>
         </div>
         <div class="border-b border-gray-200 my-2 w-full"></div>
-        <div class="flex gap-8 mt-5">
+        <div class="flex fm:flex-col gap-8 mt-5">
           <div class="fd:w-[70%]" v-if="news !== null">
             <div class="flex flex-col gap-10">
               <div>
@@ -51,18 +51,22 @@
             </div>
             <div class="border-b border-gray-200 my-3 w-full"></div>
             <div class="flex flex-col" v-for="_news in randomNews" :key="_news.id">
-              <routerLink :to="{name:'NewsDetail',params:{slug:_news.slug}}" class="flex gap-5">
-                <div class="w-[35%]"><img class="w-full" :src="$store.state.url + _news.image" :alt="_news.title"></div>
-                <div class="flex flex-col justify-end items-end">
-                <span class="fm:text-sm text-gray-700">
-                    {{_news.title}}
-                </span>
+              <div class="flex gap-3">
+                <routerLink :to="{name:'NewsDetail',params:{slug:_news.slug}}" class="w-[30%]">
+                  <img class="w-full" :src="$store.state.url + _news.image" :alt="_news.title">
+                </routerLink>
+                <routerLink :to="{name:'NewsDetail',params:{slug:_news.slug}}" class="flex flex-col items-end w-[70%]">
+                  <div>
+                    <span class="fm:text-sm text-gray-700">
+                        {{_news.title}}
+                    </span>
+                  </div>
                   <div class="flex items-center gap-1">
                     <span class="text-sm text-gray-500">{{news.ir_created_at}}</span>
                     <span class="text-sm"><i class="far fa-calendar-clock text-sm text-gray-500"></i></span>
                   </div>
-                </div>
-              </routerLink>
+                </routerLink>
+              </div>
               <div class="border-b border-gray-100 my-3 w-full"></div>
             </div>
           </div>
@@ -109,8 +113,8 @@ onMounted(async ()=>{
 })
 
 watch(route, async ( current ) => {
-  slug.value = current.params['slug'];
   if(current.name === 'NewsDetail'){
+    slug.value = current.params['slug'];
     await getData()
   }
 })

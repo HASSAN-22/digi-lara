@@ -259,9 +259,9 @@ onMounted(async () => {
 
 
 watch(route, async ( current ) => {
-  slug.value = current.params['slug'];
-  removeFilter('all',null,false);
   if(current.name === 'ProductsList'){
+    slug.value = current.params['slug'];
+    removeFilter('all',null,false);
     await getData()
     await getProductProperties()
   }
