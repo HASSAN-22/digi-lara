@@ -9,6 +9,7 @@ use App\Models\Product;
 use App\Models\User;
 use Illuminate\Support\Collection;
 use  Illuminate\Contracts\Auth\Authenticatable;
+use Illuminate\Support\Facades\Log;
 
 class BasketService
 {
@@ -87,6 +88,7 @@ class BasketService
         foreach (self::$baskets as $basket) {
             $product = $basket->product;
             $propertyAmount = self::getPropertyAmount($basket)['amount'];
+
             self::$originalAmount += $propertyAmount;
             $amount = $propertyAmount;
             if ($product->amazing_offer_status == 'yes') {
@@ -94,12 +96,11 @@ class BasketService
             } else if ($product->amazing_price != null) {
                 $amount = self::amazingPrice((int)$product->price, (int)$product->amazing_price);
             } else {
+                $amount = $product->price;
                 $coupon = $basket->coupon;
                 if (self::$withCoupon and $coupon) {
                     $amount = self::couponCategories($coupon, $product, $amount);
                     $amount = self::couponProducts($coupon, $product, $amount);
-                }else{
-                    $amount = $product->price;
                 }
             }
             self::$originalAmount += ($basket->count * $product->price);
@@ -126,12 +127,11 @@ class BasketService
             self::$discountType = 'amazing_price';
             $amount = self::amazingPrice((int)$product->price, (int)$product->amazing_price);
         } else {
+            $amount = $product->price;
             $coupon = $basket->coupon;
             if ($coupon) {
                 $amount = self::couponCategories($coupon, $product, $amount);
                 $amount = self::couponProducts($coupon, $product, $amount);
-            }else{
-                $amount = $product->price;
             }
         }
         $amount = ($amount * $basket->count);
