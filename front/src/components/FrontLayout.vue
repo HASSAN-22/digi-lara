@@ -350,13 +350,13 @@
             </div>
           </div>
           <div class="flex justify-end gap-3 fd:w-[50%]">
-            <div class="">
+            <div class="" v-if="$store.state.configSite.enamad !== null">
               <div class="border border-gray-200 rounded p-3">{{$store.state.configSite.enamad}}</div>
             </div>
-            <div class="">
+            <div class="" v-if="$store.state.configSite.samandehi !== null">
               <div class="border border-gray-200 rounded p-3">{{$store.state.configSite.samandehi}}</div>
             </div>
-            <div class="">
+            <div class="" v-if="$store.state.configSite.mojavez !== null">
               <div class="border border-gray-200 rounded p-3">{{$store.state.configSite.mojavez}}</div>
             </div>
           </div>
@@ -411,6 +411,8 @@ async function index(){
     pages.value = data.pages;
     if(data.store_detail){
       store.state.siteName = data.store_detail.shop_name_ir
+      store.state.url = data.store_detail.shop_url;
+      store.state.api = data.store_detail.shop_url + '/api/';
       store.state.configSite = {...data.store_detail}
     }
     if(data.footer_box){

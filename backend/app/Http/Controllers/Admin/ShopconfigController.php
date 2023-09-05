@@ -63,20 +63,23 @@ class ShopconfigController extends Controller
             'shop_address'=>['required','string','max:400'],
             'support_phone'=>['required','numeric'],
             'email'=>['required','string','email','max:255'],
-            'enamad'=>['required','string','max:500'],
-            'samandehi'=>['required','string','max:500'],
-            'mojavez'=>['required','string','max:500'],
+            'enamad'=>['nullable','string','max:500'],
+            'samandehi'=>['nullable','string','max:500'],
+            'mojavez'=>['nullable','string','max:500'],
             'logo'=>['required','regex:/data:image\\/(jpeg|jpeg|png|svg)/i'],
             'footer_logo'=>['required','regex:/data:image\\/(jpeg|jpeg|png|svg)/i'],
             'copy_right'=>['required','string','max:400'],
             'shop_bio'=>['required','string','max:10000'],
             'comment_rule'=>['required','string','max:10000'],
         ]);
+        $host = parse_url($request->shop_url, PHP_URL_HOST);
         $this->setAuthorize(Shopconfig::getValue('store_detail'));
         $result = Shopconfig::updateOrCreate(['option'=>'store_detail'],['value'=>json_encode($request->except('option'))]);
         setEnvironmentValue([
             'APP_NAME'=>"'".$request->shop_name."'",
             'APP_URL'=>$request->shop_url,
+            'SANCTUM_STATEFUL_DOMAINS'=>$host,
+            'SESSION_DOMAIN'=>".{$host}",
         ]);
         return $result ? response(['status'=>'success'],201) : response(['status'=>'error'],500);
     }

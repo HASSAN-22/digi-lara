@@ -96,13 +96,13 @@
           </div>
           <div class="flex fm:flex-col fd:items-center justify-between gap-5 mb-5">
             <div class="fd:w-[50%]">
-              <Input label="لینک اینماد" v-model="enamad" id="enamad"/>
+              <Input label="لینک اینماد" v-model="enamad" id="enamad" :required="false"/>
             </div>
             <div class="fd:w-[50%]">
-              <Input  label="لینک ستاد ساماندهی" v-model="samandehi" id="samandehi"/>
+              <Input  label="لینک ستاد ساماندهی" v-model="samandehi" id="samandehi" :required="false"/>
             </div>
             <div class="fd:w-[50%]">
-              <Input label="لینک مجوز کشوری" v-model="mojavez" id="mojavez"/>
+              <Input label="لینک مجوز کشوری" v-model="mojavez" id="mojavez" :required="false"/>
             </div>
           </div>
           <div class="flex fm:flex-col fd:items-center justify-between gap-5 mb-5">
@@ -412,9 +412,9 @@ async function showStoreDetail(_loading=true){
       copyRight.value=data.copy_right;
       shopBio.value=data.shop_bio;
       commentRule.value=data.comment_rule;
-      enamad.value=data.enamad;
-      samandehi.value=data.enamad;
-      mojavez.value=data.mojavez;
+      enamad.value=data.enamad === null ? '' : data.enamad;
+      samandehi.value=data.samandehi === null ? '' : data.samandehi;
+      mojavez.value=data.mojavez === null ? '' : data.mojavez;
       logo.value=data.logo;
       logoPreview.value=data.logo;
       logoKey.value++;
