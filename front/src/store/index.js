@@ -120,7 +120,7 @@ export default createStore({
         state.errors = Object.values(response.data.errors)
         state.validationErrorModal = true;
       }else if(response.status === 403 || response.status === 401){
-        window.location.href = `/error/${response.status}/دسترسی شما غیر مجاز است برای بررسی بیشتر با ما تماس بگیرید`;
+        // window.location.href = `/error/${response.status}/دسترسی شما غیر مجاز است برای بررسی بیشتر با ما تماس بگیرید`;
       }
     },
 

@@ -190,19 +190,18 @@
         <div class="mb-5">
           <label class="fm:text-sm">پنل پیامک<b class="text-red-500 !font-bold">*</b></label>
           <select v-model="smsDriver" @change="changeSmsDriver($event)" id="companyType" class="fm:text-sm border border-gray-200 p-2 outline-none rounded-lg w-full">
-            <option value="" selected>--- انتخاب کنید ---</option>
-            <option value="ippanel" data-select2-id="11">Ippanel</option>
-            <option value="raygansms" data-select2-id="47">رایگان اس ام اس</option>
+            <option value="" selected disabled>--- انتخاب کنید ---</option>
+            <option value="Ippanel">Ippanel</option>
           </select>
         </div>
         <div v-if="smsDriver !== ''">
           <div class="mb-5">
-            <Input :label="smsDriver === 'ippanel' ? 'api key' : 'نام کاربری'" v-model="nameKey" id="nameKey"/>
+            <Input :label="smsDriver === 'Ippanel' ? 'api key' : 'نام کاربری'" v-model="nameKey" id="nameKey"/>
           </div>
           <div class="mb-5">
             <Input type="number" label="شماره تلفن" v-model="smsPhone" id="smsPhone" placeholder="مثال: 981000123456"/>
           </div>
-          <div class="mb-5" v-if="smsDriver === 'raygansms'">
+          <div class="mb-5" v-if="smsDriver !== 'Ippanel'">
             <Input type="password" label="رمز عبور" v-model="smsPassword" id="smsPassword"/>
           </div>
         </div>
@@ -422,7 +421,7 @@ async function showStoreDetail(_loading=true){
       footerLogoPreview.value=data.footer_logo;
       footerLogoKey.value++;
     }
-  })
+  }).catch(err=>{})
   loading.value = false;
 }
 async function insertStoreDetail(){
@@ -465,7 +464,7 @@ async function showSocialMedia(_loading=true){
       facebook.value=data.facebook;
       twitter.value=data.twitter;
     }
-  })
+  }).catch(err=>{})
   loading.value = false;
 }
 async function insertSocialMedia(){
@@ -513,7 +512,7 @@ async function showFooterBox(_loading=true){
       originalPreview.value=data.original_image;
       originalKey.value++;
     }
-  })
+  }).catch(err=>{})
   loading.value = false;
 }
 async function insertFooterBox(){
@@ -549,7 +548,7 @@ async function showSMS(_loading=true){
       smsPhone.value=data.sms_phone;
       smsPassword.value=data.sms_password;
     }
-  })
+  }).catch(err=>{})
   loading.value = false;
 }
 async function insertSMS(){
@@ -585,7 +584,7 @@ async function showOtherSetting(_loading=true){
       mailPassword.value=data.mail_password;
       mailAddress.value=data.mail_address;
     }
-  })
+  }).catch(err=>{})
   loading.value = false;
 }
 async function insertOtherSetting(){

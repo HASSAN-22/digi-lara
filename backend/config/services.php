@@ -31,15 +31,12 @@ return [
         'region' => env('AWS_DEFAULT_REGION', 'us-east-1'),
     ],
 
-    'raygansms' => [
-        'user_name' => env('RAYGANSMS_USERNAME'),
-        'password' => env('RAYGANSMS_PASSWORD'),
-        'phone_number' => env('RAYGANSMS_PHONE_NUMBER'),
-    ],
 
-    'ippanel' => [
-        'phone'=>env('IPPANEL_PHONE',''),
-        'api_key'=>env('IPPANEL_API_KEY')
+    'sms'=>[
+        'phone'=>env('SMS_PHONE_NUMBER',''),
+        'ippanel' => [
+            'api_key'=>env('IPPANEL_API_KEY')
+        ]
     ]
 
 ];

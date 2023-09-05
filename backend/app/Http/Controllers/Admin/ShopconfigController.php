@@ -163,18 +163,17 @@ class ShopconfigController extends Controller
         ]);
         $this->setAuthorize(Shopconfig::getValue('sms'));
         $result = Shopconfig::updateOrCreate(['option'=>'sms'],['value'=>json_encode($request->except('option'))]);
-        if($request->sms_driver == 'ippanel'){
-            setEnvironmentValue([
-               'IPPANEL_API_KEY'=>"{$request->name_key}",
-               'IPPANEL_PHONE'=>'+'.$request->sms_phone
-            ]);
-        }else{
-            setEnvironmentValue([
-                'RAYGANSMS_USERNAME'=>$request->name_key,
-                'RAYGANSMS_PASSWORD'=>$request->sms_password,
-                'RAYGANSMS_PHONE_NUMBER'=>'+'.$request->sms_phone
+        $environments = ['SMS_DRIVER'=>$request->sms_driver];
+
+        if($request->sms_driver == 'Ippanel'){
+            $environments = array_merge($environments, [
+                'IPPANEL_API_KEY'=>"{$request->name_key}",
+                'SMS_PHONE_NUMBER'=>'+'.$request->sms_phone,
+                'SMS_USERNAME'=>'*******',
+                'SMS_PASSWORD'=>'*******',
             ]);
         }
+        setEnvironmentValue($environments);
         return $result ? response(['status'=>'success'],201) : response(['status'=>'error'],500);
     }
 
