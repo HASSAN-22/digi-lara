@@ -88,7 +88,6 @@ class NotificationService
     {
         $query = str_replace(array('?'), array('\'%s\''), self::query()->toSql());
         $query = vsprintf($query, self::query()->getBindings());
-        Log::info($query);
         return self::query()->whereNull('read_at')->get();
     }
 
