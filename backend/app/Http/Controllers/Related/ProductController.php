@@ -9,6 +9,7 @@ use App\Enums\UserAccessEnum;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\ProductRequest;
 use App\Http\Resources\ProductResource;
+use App\Imports\ProductsImport;
 use App\Models\Brand;
 use App\Models\Category;
 use App\Models\Color;
@@ -29,6 +30,8 @@ use App\Services\ProductService;
 use App\Services\Uploader\Upload;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
+use Maatwebsite\Excel\Facades\Excel;
 
 class ProductController extends Controller
 {
@@ -78,7 +81,7 @@ class ProductController extends Controller
         try{
 
             // Upload original product image
-            $path = $this->uploadMainImage($request);
+            $path = $this->uploadOriginalImage($request);
             $productData = $this->productData($user, $request, $path);
 
             if($request->amazing_offer_percent > 0 and $request->is_amazing_offer == 'yes'){
@@ -159,7 +162,7 @@ class ProductController extends Controller
             // Upload original product image and remove previous image
             $path = $product->image;
             if($request->hasFile('image')){
-                $path = $this->uploadMainImage($request);
+                $path = $this->uploadOriginalImage($request);
                 $this->removeOriginalImage($product->image);
             }
             // Update product
@@ -171,9 +174,9 @@ class ProductController extends Controller
             };
 
             if($user->isSeller()){
-                if($request->amazing_offer_percent > 0 and $request->is_amazing_offer == 'yes' and $product->amazing_offer_status !== 'yes'){
+                if($request->amazing_offer_percent > 0 and $request->is_amazing_offer == 'yes' and $product->amazing_offer_status !== StatusEnum::ACTIVE->value){
                     $productData['amazing_offer_status']= StatusEnum::PENDING;
-                }elseif($product->amazing_offer_status == 'yes' and $request->is_amazing_offer == 'yes'){
+                }elseif($product->amazing_offer_status == StatusEnum::ACTIVE->value and $request->is_amazing_offer == 'yes'){
                     $productData['amazing_offer_percent'] = $product->amazing_offer_percent;
                 }else{
                     $emptyAmazingOffer();
@@ -239,13 +242,23 @@ class ProductController extends Controller
         if($product->delete()){
             try{
                 $this->removeOriginalImage($product->image);
-                $this->removeImages($images);
+                $images->map(fn($image)=>removeFile($image->image));
                 NotificationService::name('ProductNotification')->delete((int)$product->id, 'data->product->id');
             }catch (\Exception $e){};
             return response(['status'=>'success']);
         }
         return response(['status'=>'error'],500);
 
+    }
+
+    public function importProducts(Request $request){
+        $this->authorize('importProduct',Product::class);
+        $request->validate([
+            'import_file'=>['required','mimes:xlsx,xls']
+        ]);
+        $productImport = new ProductsImport();
+        Excel::import($productImport, $request->import_file);
+        return response(['status'=>'success','data'=>['error'=>$productImport->error,'success'=>$productImport->successCount]],201);
     }
 
     /**
@@ -454,22 +467,6 @@ class ProductController extends Controller
     }
 
     /**
-     * Remove product images
-     * @param mixed $images
-     * @return void
-     */
-    private function removeImages(mixed $images): void
-    {
-        foreach ($images as $key=>$image){
-            if($key == 0){
-
-            }
-            removeFile($image->image);
-        }
-
-    }
-
-    /**
      * Delete the original image along with all other sizes
      * @param $image
      * @param $id
@@ -494,7 +491,7 @@ class ProductController extends Controller
      * @param ProductRequest $request
      * @return string|null
      */
-    private function uploadMainImage(ProductRequest $request): ?string
+    private function uploadOriginalImage(ProductRequest $request): ?string
     {
         $largeSize = config('app.large_image_size');
         $mediumSize = config('app.medium_image_size');

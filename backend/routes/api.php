@@ -224,6 +224,7 @@ Route::group(['middleware'=>'auth:sanctum'],function (){
         Route::get('product/{product}','show');
         Route::patch('product/{product}','update');
         Route::delete('product/{product}','destroy');
+        Route::post('product/import','importProducts');
     });
 
     Route::controller(\App\Http\Controllers\Related\AmazingProductController::class)->group(function(){

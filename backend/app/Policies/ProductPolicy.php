@@ -158,4 +158,11 @@ class ProductPolicy
     {
         return $user->isSeller() and $product->user_id == $user->id;
     }
+
+
+    ////////////////////////////////// Import product ///////////////////////////////////////
+
+    public function importProduct(User $user){
+        return $user->isSeller() or $user->isAdmin();
+    }
 }
