@@ -212,7 +212,7 @@
                   <label class="fm:text-sm" for="is_original">رنگ<b class="text-red-500 !font-bold">*</b></label>
                   <select v-model="productColors[count-1]" class="fm:text-sm border border-gray-200 p-2 outline-none rounded-lg w-full">
                     <option value="">--- انتخاب کنید ---</option>
-                    <option v-for="color in allColors" :key="color.id" :value="color.id">{{color.color}}</option>
+                    <option v-for="color in allColors" :key="color.id" :value="color.id" :style="{ 'background-color': color.color_code + '!important' }">{{color.color}}</option>
                   </select>
                 </div>
                 <div class="w-full">

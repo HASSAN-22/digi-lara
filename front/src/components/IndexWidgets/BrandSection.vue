@@ -9,9 +9,10 @@
     <div class="brand">
       <Slider :slides="(displaySize < 769) ? 4 : 8">
         <SwiperSlide v-for="brand in props.widget.brands" :key="brand.id">
-          <a href="" class="border-l border-gray-200 p-3">
+          <a href="" class="p-3">
             <img :src="store.state.url + brand.logo" class="rounded"/>
           </a>
+          <div class="border-l border-red-500"></div>
         </SwiperSlide>
       </Slider>
     </div>

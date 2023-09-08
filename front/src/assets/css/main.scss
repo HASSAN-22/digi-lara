@@ -85,10 +85,11 @@ input[type=number] {
       margin-top:2rem;
       display:flex;
       align-items: center;
-      gap:.6rem;
+      gap:3rem;
     }
   }
 }
+
 
 input:checked ~ .dot {
   transform: translateX(140%);
