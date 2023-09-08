@@ -412,7 +412,7 @@ class SiteController extends Controller
             $query = $query->FilterByProperties($request->property);
         }
         if($request->exists('only_available_products')){
-            $query = $query->available($request->only_available_products);
+            $query = $query->available(json_decode($request->only_available_products));
         }
         if($request->exists(['from_price','to_price'])){
             $query = $query->filterByPrice($request->from_price, $request->to_price);
