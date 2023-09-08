@@ -90,7 +90,7 @@
               <div v-else-if="item.name === 'amazing_offer' && item.showOption && item.id === currentToggleId">
                 <div class="flex justify-between fm:flex-col gap-2">
                   <div class="flex flex-col gap-1">
-                    <Input @change="getFile($event, item.id, 'amazing_image','amazing_key',['svg','jpg','jpeg','png','gif','webp'], $store.state.oneMgByte)" :key="item.amazing_key" type="file" label="تصویر پشنهاد شگغت انگیز" :alert="`فرمت مجار: svg,jpg,jpeg,png,gif,webp | حداکثر حجم: ${$store.state.imageSize} | سایز: 120x120px`"/>
+                    <Input @change="getFile($event, item.id, 'amazing_image','amazing_key',['svg','jpg','jpeg','png','gif','webp'], $store.state.oneMgByte)" :key="item.amazing_key" type="file" label="تصویر پشنهاد شگفت انگیز" :alert="`فرمت مجار: svg,jpg,jpeg,png,gif,webp | حداکثر حجم: ${$store.state.imageSize} | سایز: 120x120px`"/>
                     <img v-if="item.amazing_image" :src="item.amazing_image" class="w-[100px] h-[100px] fm:w-[50px] fm:h-[50px]" />
                   </div>
                   <div class="flex flex-col gap-1">
