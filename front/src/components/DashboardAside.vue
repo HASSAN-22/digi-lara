@@ -1,15 +1,15 @@
 <template>
-  <li :class="['hover:bg-gray-50 p-2 cursor-pointer', tab === props.tab ? 'bg-gray-100' : '']" @click="changeTab(props.tab)">
+  <li :class="['hover:bg-gray-50 p-2 cursor-pointer', $store.state.asideTab === props.tab ? 'bg-gray-100' : '']" @click="changeTab(props.tab)">
     <div class="flex items-center justify-between">
       <div class="flex items-center gap-1">
         <span class="text-gray-600"><i :class="props.icon"></i></span>
         <span class="text-gray-600">{{props.menu}}</span>
       </div>
-      <span v-if="tab !== props.tab"><i class="far text-sm fa-chevron-left text-gray-600"></i></span>
+      <span v-if="$store.state.asideTab !== props.tab"><i class="far text-sm fa-chevron-left text-gray-600"></i></span>
       <span v-else><i class="far text-sm fa-chevron-down text-gray-600"></i></span>
     </div>
   </li>
-  <li v-if="tab === props.tab">
+  <li v-if="$store.state.asideTab === props.tab">
     <ul class="flex flex-col">
       <li v-for="submenu in props.submenus" :key="submenu.id">
         <div class="hover:bg-gray-200 p-2 pr-6 cursor-pointer" v-if="submenu.perm === undefined || store.getters.userCan(submenu.perm,'include')">
@@ -45,10 +45,8 @@ const props = defineProps({
     type:Array
   }
 });
-let tab = ref(0);
-
 function changeTab(_tab){
-  tab.value = _tab === tab.value ? 0 : _tab;
+  store.state.asideTab = _tab === store.state.asideTab ? 0 : _tab;
 }
 
 </script>

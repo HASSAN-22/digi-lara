@@ -61,6 +61,7 @@ export default createStore({
     sizes:['S','M','L','XL','2XL','3XL','4XL'],
     api:process.env.VUE_APP_BACKEND+'/api/',
     url:process.env.VUE_APP_BACKEND,
+    asideTab:0,
     errors:[],
     searchModal:false,
     searchText:'',
