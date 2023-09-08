@@ -56,7 +56,7 @@
                     <label class="fm:text-sm">دسته</label>
                     <Multiselect
                         v-model="item.category_id"
-                        :options="allCategories"
+                        :options="allCategoryHaveProducts"
                         :rtl="true"
                         :close-on-select="true"
                         placeholder="--- انتخاب کنید ---"
@@ -167,7 +167,7 @@
                     <Multiselect
                         class="multiselect-tags"
                         v-model="item.category_ids"
-                        :options="allCategories"
+                        :options="allParents"
                         :rtl="true"
                         mode="tags"
                         :close-on-select="false"
@@ -255,7 +255,8 @@ let loading = ref(false)
 let model = ref('widget')
 let products = ref([])
 let allProducts = ref([])
-let allCategories = ref([])
+let allParents = ref([])
+let allCategoryHaveProducts = ref([])
 let allBrands = ref([])
 let dropItems = ref([])
 let currentToggleId = ref(0)
@@ -361,9 +362,13 @@ async function show(_loading = true){
     allProducts.value = data.products.map(item=>{
       return {value:item.id, label:item.ir_name}
     });
-    allCategories.value = data.categories.map(item=>{
+    allCategoryHaveProducts.value = data.category_have_products.map(item=>{
       return {value:item.id, label:item.title}
     });
+    allParents.value = data.parents.map(item=>{
+      return {value:item.id, label:item.title}
+    });
+
     allBrands.value = data.brands.map(item=>{
       return {value:item.id, label:item.name}
     });

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Enums\CategoryTypeEnum;
 use App\Enums\PublishEnum;
 use App\Enums\StatusEnum;
 use App\Http\Controllers\Controller;
@@ -9,7 +10,10 @@ use App\Models\Brand;
 use App\Models\Category;
 use App\Models\Product;
 use App\Models\Widget;
+use App\Services\CategoryService;
+use App\Services\ProductService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
 class WidgetController extends Controller
 {
@@ -26,10 +30,12 @@ class WidgetController extends Controller
             $this->authorize('viewAny',Widget::class);
             $widget = Widget::first();
         }
-        $products = Product::where('publish',PublishEnum::PUBLISHED->value)->whereHas('user',fn($q)=>$q->where('status','yes')->where('access','!=','user'))->get();
-        $categories = Category::where('status',StatusEnum::ACTIVE->value)->get();
+        $products = ProductService::product()->published()->activeSeller()->get();
+        $categories = CategoryService::category()->active()->where(['type',CategoryTypeEnum::CATEGORY])->get();
+        $parents = (clone $categories)->where('parent_id','0')->values();
+        $categoryHaveProducts = (clone $categories)->filter(fn($item)=>$item->children->count() <= 0)->values();
         $brands = Brand::where('status',StatusEnum::ACTIVE->value)->get();
-        return response(['status'=>'success','data'=>['widgets'=>$widget, 'products'=>$products,'categories'=>$categories,'brands'=>$brands]]);
+        return response(['status'=>'success','data'=>['widgets'=>$widget, 'products'=>$products,'categories'=>$categories,'parents'=>$parents,'category_have_products'=>$categoryHaveProducts,'brands'=>$brands]]);
     }
 
     /**
