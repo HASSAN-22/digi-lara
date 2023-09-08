@@ -28,7 +28,6 @@ use App\Models\Productnotifyexists;
 use App\Models\Productquestion;
 use App\Models\Productquestionanswer;
 use App\Models\Province;
-use App\Models\Shopconfig;
 use App\Models\Size;
 use App\Models\Transport;
 use App\Models\User;
@@ -47,7 +46,6 @@ use App\Services\SMS\SmsService;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
 
 class SiteController extends Controller
 {
@@ -404,16 +402,19 @@ class SiteController extends Controller
             }
 
         }
-
         if($request->exists('color')){
             $query = $query->filterByColor($request->color);
-        }elseif($request->exists('size')){
+        }
+        if($request->exists('size')){
             $query = $query->filterBySize($request->size);
-        }elseif($request->exists('property')){
+        }
+        if($request->exists('property')){
             $query = $query->FilterByProperties($request->property);
-        }elseif($request->exists('only_available_products')){
+        }
+        if($request->exists('only_available_products')){
             $query = $query->available($request->only_available_products);
-        }elseif($request->exists(['from_price','to_price'])){
+        }
+        if($request->exists(['from_price','to_price'])){
             $query = $query->filterByPrice($request->from_price, $request->to_price);
         }
 

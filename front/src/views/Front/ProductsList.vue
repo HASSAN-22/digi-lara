@@ -274,11 +274,14 @@ async function getData(_loading=true,page=1, sort=''){
   let url = `${store.state.api}product-list?page=${page}&slug=${slug.value}&sort=${sort}&only_available_products=${onlyAvailableProducts.value}`
   if(colorSelected.value.length > 0){
     url+=makeQuery(colorSelected.value,'color');
-  }else if(sizeSelected.value.length > 0){
+  }
+  if(sizeSelected.value.length > 0){
     url+=makeQuery(sizeSelected.value,'size');
-  }else if(filterSelected.value.length > 0){
+  }
+  if(filterSelected.value.length > 0){
     url+=makeQuery(filterSelected.value,'property');
-  }else if(fromPrice.value > 0 || toPrice.value > 0){
+  }
+  if(fromPrice.value > 0 || toPrice.value > 0){
     url+=`&from_price=${fromPrice.value}&to_price=${toPrice.value}`;
   }
   await axios.get(url).then(resp=>{
