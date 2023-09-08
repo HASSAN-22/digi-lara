@@ -29,7 +29,7 @@ class BrandController extends Controller
             $this->authorize('viewAnySeller',Brand::class);
         }
         $brands = $query->paginate(10);
-        $users = User::where('access','seller')->get();
+        $users = User::where('access','!=','user    ')->get();
         return BrandResource::collection($brands)->additional(['users'=>$users]);
     }
 
