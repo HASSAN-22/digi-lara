@@ -422,7 +422,7 @@ class SiteController extends Controller
                $item['rating'] = $this->calcProductRating($item->productComments)[1];
                return $item;
             })->toArray();
-        $products = paginate($request, $products);
+        $products = paginate($request, $products,12);
         return response(['status'=>'success','data'=>['products'=>$products, 'category'=>$category]]);
     }
 

@@ -8,7 +8,7 @@
         <div class="flex gap-2 items-center">
           <UserCanAction action="create" @create="create()" permission="create_products" />
           <Button @click="getData(false, 1, true)" my_class="!bg-white !py-2 !px-2" :btnLoading="refresh"><i class="far fa-sync text-2xl fm:text-lg text-gray-700"></i></Button>
-          <Button text="ایمپورت کردن کالا" @click="showImport()" my_class="!bg-white !border !border-blue-400 !text-blue-400 !py-2 !px-2"></Button>
+          <Button v-if="isAdmin" text="ایمپورت کردن کالا" @click="showImport()" my_class="!bg-white !border !border-blue-400 !text-blue-400 !py-2 !px-2"></Button>
         </div>
         <div class="ml-2 fm:mt-3">
           <Input type="search" v-debounce="searchData" :debounce-events="['keydown']" id="search" placeholder="جستجو: متن خود را وارد کنید" :required="false" />
@@ -197,6 +197,7 @@
                 <option value="18">18 ماه</option>
                 <option value="24">24 ماه</option>
                 <option value="1">مادام العمر</option>
+                <option value="0">هیچکدام</option>
               </select>
             </div>
           </div>
@@ -582,8 +583,9 @@ async function getProperties(_loading=true){
   await  axios.get(`${store.state.api}${model.value}/get-property/${categoryId.value}`).then(resp=>{
     // let data = resp.data.data.reduce((r, a) => r.concat(a), []);
     allProperties.value = resp.data.data.map((item)=>{
-      return {value:item.id, label:item.property.property}
+      return {value:item.property_id, label:item.property.property}
     });
+    allProperties.value = allProperties.value.filter((a, i) => allProperties.value.findIndex((s) => a.value === s.value) === i)
   }).catch(err=>{
     Toast.error('دریافت ویژگی ها با خطا مواجه شد')
   })

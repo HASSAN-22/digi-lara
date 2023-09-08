@@ -34,7 +34,7 @@
                 <span>{{item.shop_name}}</span>
               </Notification>
             </Td>
-            <Td title="نوع فروشندگی" class="fm:text-sm">{{item.type === 'lega' ? 'حقوقی' : 'حقیقی'}}</Td>
+            <Td title="نوع فروشندگی" class="fm:text-sm">{{item.type}}</Td>
             <Td title="موبایل" class="fm:text-sm">{{item.mobile}}</Td>
             <Td title="شبا" class="fm:text-sm">{{item.shaba}}</Td>
             <Td title="وضعیت" class="fm:text-sm">{{item.ir_status}}</Td>

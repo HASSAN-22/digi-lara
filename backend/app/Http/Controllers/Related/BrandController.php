@@ -48,7 +48,7 @@ class BrandController extends Controller
             'registration_form'=>Upload::upload($request,'registration_form',$this->DIRECTORY),
             'link'=>$request->link,
             'logo'=>Upload::upload($request,'logo',$this->DIRECTORY),
-            'status'=>$user->isAdmin() ? StatusEnum::from($request->status) :  StatusEnum::from('pending'),
+            'status'=>$user->isAdmin() ? StatusEnum::from($request->status) :  StatusEnum::PENDING,
         ]);
         return $brand ? response(['status'=>'success'],201) : response(['status'=>'error'],500);
     }
@@ -75,9 +75,7 @@ class BrandController extends Controller
         $user = auth()->user();
 
         $this->authorize($user->isAdmin() ? 'update' : 'updateSeller',$brand);
-        $pervRegistrationForm = $brand->registration_form;
-        $prevLogo = $brand->logo;
-        $brand = $brand->update([
+       $brand = $brand->update([
             'user_id'=>$user->isAdmin() ? $request->user_id : $user->id,
             'name'=>$request->ir_name,
             'en_name'=>$request->en_name,
@@ -87,12 +85,8 @@ class BrandController extends Controller
             'link'=>$request->link,
             'reason_rejection'=>$request->reason_rejection,
             'logo'=>Upload::upload($request,'logo',$this->DIRECTORY, $brand->logo),
-            'status'=>$user->isAdmin() ? StatusEnum::from($request->status) :  StatusEnum::from('pending'),
+            'status'=>$user->isAdmin() ? StatusEnum::from($request->status) :  StatusEnum::PENDING,
         ]);
-        if($brand){
-            removeFile($pervRegistrationForm);
-            removeFile($prevLogo);
-        }
         return $brand ? response(['status'=>'success'],201) : response(['status'=>'error'],500);
     }
 

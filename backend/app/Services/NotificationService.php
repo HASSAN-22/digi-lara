@@ -30,10 +30,16 @@ class NotificationService
     /**
      * Find notifications for specific user
      * @param int $userId
+     * @param bool $isAdmin
      * @return NotificationService
      */
-    public static function forUser(int $userId):NotificationService{
-        self::query()->where('notifiable_id', $userId);
+    public static function forUser(int $userId, bool $isAdmin = false):NotificationService{
+        if($isAdmin){
+            $userIds = User::where('access','admin')->get()->pluck('id')->toArray();
+            self::query()->whereIn('notifiable_id', $userIds);
+        }else{
+            self::query()->where('notifiable_id', $userId);
+        }
         return new self();
     }
 

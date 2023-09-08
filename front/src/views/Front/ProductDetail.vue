@@ -185,9 +185,15 @@
                 <div class="flex gap-4 border-b justify-between border-gray-300 pb-4">
                   <div class="flex items-center gap-4">
                     <span><i class="far fa-shield-check text-2xl"></i></span>
-                    <span>
-                    گارانتی {{product.guarantee_month === '1' ? 'مادام العمر' : product.guarantee_month}} ماهه {{product.guarantee.guarantee}}
-                  </span>
+                    <span v-if="product.guarantee_month === '1'">
+                    گارانتی مادام العمر {{product.guarantee.guarantee}}
+                    </span>
+                    <span v-if="product.guarantee_month === '0'">
+                    گارانتی {{product.guarantee.guarantee}}
+                    </span>
+                    <span v-else>
+                    گارانتی {{product.guarantee_month}} ماهه {{product.guarantee.guarantee}}
+                    </span>
                   </div>
                   <div class="flex flex-col gap-2 p-2 bg-red-100 rounded items-center">
                     <span><i class="far fa-certificate text-4xl text-red-400"></i></span>
@@ -293,7 +299,7 @@
             <div :class="['p-2',tab === 1 ? 'block' : 'hidden']">
               <p class="break-words fm:text-sm" v-html="product.description"></p>
               <div class="mt-6 flex flex-col gap-5">
-                <div class="flex items-center gap-2">
+                <div class="flex items-center gap-2" v-if="JSON.parse(product.strengths).length > 0">
                   <span class="fm:text-sm">نکات مثبت</span>
                   <div class="bg-green-50 p-2 rounded">
                     <span class="text-green-500 text-sm !font-medium">{{JSON.parse(product.strengths).join(', ')}}</span>

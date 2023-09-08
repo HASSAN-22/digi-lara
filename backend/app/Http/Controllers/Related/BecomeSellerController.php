@@ -63,6 +63,7 @@ class BecomeSellerController extends Controller
                 'identity_card_front'=>Upload::upload($request,'identity_card_front',$this->DIRECTORY),
                 'identity_card_back'=>Upload::upload($request,'identity_card_back',$this->DIRECTORY),
                 'status'=>StatusEnum::PENDING,
+                'address'=>$request->address,
             ]);
 
             if($request->seller_type == 'legal'){
@@ -74,7 +75,6 @@ class BecomeSellerController extends Controller
                     'national_identity_number'=>$request->national_identity_number,
                     'economic_number'=>$request->economic_number,
                     'authorized_representative'=>$request->authorized_representative,
-                    'address'=>$request->address,
                 ]);
             }else{
                 Becomesellerreal::create([
@@ -114,7 +114,7 @@ class BecomeSellerController extends Controller
         }
         $becomeseller['type'] = typeService($becomeseller['type'])->sellerType('fa')->get();
         $becomeseller['status'] = typeService($becomeseller['status'])->status('fa')->get();
-        NotificationService::name('BecomesellerNotification')->forUser((int)$user->id)->read($becomeseller->id,'data->become_seller->id');
+        NotificationService::name('BecomesellerNotification')->forUser((int)$user->id, $user->isAdmin())->read($becomeseller->id,'data->become_seller->id');
         return response(['status'=>'success','data'=>$becomeseller]);
     }
 
@@ -135,7 +135,7 @@ class BecomeSellerController extends Controller
         try{
             $becomeseller->update(['status'=>$request->status,'reject_reason'=>$request->reject_reason]);
             $becomeseller->user()->update(['access'=>$request->status == 'yes' ? 'seller' : 'user']);
-
+            NotificationService::name('BecomesellerNotification')->forUser((int)auth()->Id(),true)->read($becomeseller->id,'data->become_seller->id');
             DB::commit();
             return response(['status'=>'success'],201);
         }catch (\Exception $e){

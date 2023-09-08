@@ -163,6 +163,6 @@ class ProductPolicy
     ////////////////////////////////// Import product ///////////////////////////////////////
 
     public function importProduct(User $user){
-        return $user->isSeller() or $user->isAdmin();
+        return $user->isAdmin();
     }
 }

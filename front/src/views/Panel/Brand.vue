@@ -6,7 +6,12 @@
     <div class="mt-10 px-3 mb-3">
       <div class="mb-3 mr-2 flex justify-between fm:flex-col items-center">
         <div class="flex gap-2 items-center">
-          <UserCanAction action="create" @create="create()" permission="create_brands" />
+          <div v-if="isAdmin">
+            <UserCanAction action="create" @create="create()" permission="create_brands" />
+          </div>
+          <div v-else>
+            <Button text="اضافه کردن" @click="create()"></Button>
+          </div>
           <Button @click="getData(false, 1, true)" my_class="!bg-white !py-2 !px-2" :btnLoading="refresh"><i class="far fa-sync text-2xl fm:text-lg text-gray-700"></i></Button>
         </div>
         <div class="ml-2 fm:mt-3">
@@ -23,22 +28,28 @@
               'نوع برند',
               'وضعیت',
               'تاریخ ثبت',
+              'مشاهده',
               'عملیات'
-              ]" />
+              ]" :except="!isAdmin ? ['کاربر'] : []" />
           <tbody class="block lg:table-row-group xl:table-row-group 2xl:table-row-group md:table-row-group">
           <tr v-for="item in allData" :key="item.id" class="border border-gray-200 block lg:table-row xl:table-row 2xl:table-row md:table-row">
-            <Td title="کاربر" class="fm:text-sm">{{item.user}}</Td>
+            <Td v-if="isAdmin" title="کاربر" class="fm:text-sm">{{item.user}}</Td>
             <Td title="نام پارسی" class="fm:text-sm">{{item.ir_name}}</Td>
             <Td title="نام انگلیسی" class="fm:text-sm">{{item.en_name}}</Td>
             <Td title="نوع برند" class="fm:text-sm">{{item.brand_type}}</Td>
             <Td title="وضعیت" class="fm:text-sm">{{item.status}}</Td>
             <Td title="تاریخ ثبت" class="fm:text-sm">{{item.created_at}}</Td>
+            <Td title="مشاهده" class="fm:text-sm">
+              <Button @click="showDetail(item.id)" my_class="!bg-white border border-blue-500 !py-2 !px-2 fm:py-1 fm:px-1"><i class="far fa-eye text-green-500 fm:text-sm"></i></Button>
+            </Td>
             <Td title="عملیات">
-              <div class="flex items-center justify-center gap-2">
-                <Button @click="showDetail(item.id)" my_class="!bg-white border border-blue-500 !py-2 !px-2 fm:py-1 fm:px-1"><i class="far fa-eye text-green-500 fm:text-sm"></i></Button>
-                <UserCanAction action="show" @show="show(item.id)" permission="view_brands" :postId="item.id" />
-                <UserCanAction action="destroy" @destroy="destroy(item.id)" permission="delete_brands" :postId="item.id" />
-              </div>
+                <div v-if="isAdmin" class="flex items-center gap-2 w-full">
+                  <UserCanAction action="show" @show="show(item.id)" permission="view_brands" :postId="item.id" />
+                  <UserCanAction action="destroy" @destroy="destroy(item.id)" permission="delete_brands" :postId="item.id" />
+                </div>
+                <div v-else>
+                  <Button :my_class="'!bg-white border border-blue-500 !py-2 !px-2 fm:py-1 fm:px-1'" @click="show(item.id)"><i class="far fm:text-sm fa-edit text-blue-500"></i></Button>
+                </div>
             </Td>
           </tr>
           </tbody>
@@ -51,7 +62,7 @@
         <Paginate :current="$store.state.current" :next="$store.state.next" :previous="$store.state.previous" :total="$store.state.total" @callGetPage="getData"/>
       </div>
     </div>
-    <Modal :title="isUpdate ? 'ویرایش برند' : 'ثبت برند'" :save="isUpdate ? 'ثبت تغییرات' : 'ثبت'" :permission="isUpdate ? 'update_brands' : 'create_brands'" :btnLoading="btnLoading" @callback="isUpdate ? update() : insert()" ref="openModal">
+    <Modal :title="isUpdate ? 'ویرایش برند' : 'ثبت برند'" :save="isUpdate ? 'ثبت تغییرات' : 'ثبت'" :permission="isAdmin ? (isUpdate ? 'update_brands' : 'create_brands') : ''" :btnLoading="btnLoading" @callback="isUpdate ? update() : insert()" ref="openModal">
       <div class="mt-5 p-2 rounded bg-red-100">
         <ul class="flex flex-col gap-6">
           <li>
@@ -71,7 +82,7 @@
           </li>
         </ul>
       </div>
-      <div class="mt-5">
+      <div class="mt-5" v-if="isAdmin">
         <label class="fm:text-sm">برای کاربر<b class="text-red-500 !font-bold">*</b></label>
         <select v-model="user_id" class="fm:text-sm border border-gray-200 p-2 outline-none rounded-lg w-full">
           <option value="" selected>--- انتخاب کنید ---</option>
@@ -102,7 +113,7 @@
         </div>
        <div class="flex gap-5">
          <div class="flex flex-col fd:w-[50%]" v-if="brand_type === 'ir'">
-           <Input type="file" label="برگه ثبت برند" :alert="`فرمت مجار: jpg,jpeg,png,webp | حداکثر حجم: ${$store.state.imageSize}`" @change="getFile($event)" id="registration_form" />
+           <Input :key="registrationFormKey" type="file" label="برگه ثبت برند" :alert="`فرمت مجار: jpg,jpeg,png,webp | حداکثر حجم: ${$store.state.imageSize}`" @change="getFile($event)" id="registration_form" />
            <div v-if="previewRegistrationForm">
              <img :src="previewRegistrationForm" width="100" height="100" />
            </div>
@@ -111,13 +122,13 @@
        </div>
       </div>
       <div class="mt-5">
-        <Input type="file" label="لوگو" id="logo" @change="getFile($event,'logo')" :alert="`فرمت مجار: jpg,jpeg,png,webp | حداکثر حجم: ${$store.state.imageSize}`"/>
+        <Input :key="logoKey" type="file" label="لوگو" id="logo" @change="getFile($event,'logo')" :alert="`فرمت مجار: jpg,jpeg,png,webp | حداکثر حجم: ${$store.state.imageSize}`"/>
         <div v-if="previewLogo">
           <img :src="previewLogo" width="100" height="100" />
         </div>
       </div>
 
-      <div class="mt-5">
+      <div class="mt-5" v-if="isAdmin">
         <label class="fm:text-sm">وضعیت<b class="text-red-500 !font-bold">*</b></label>
         <select v-model="status" class="fm:text-sm border border-gray-200 p-2 outline-none rounded-lg w-full">
           <option value="" selected>--- انتخاب کنید ---</option>
@@ -218,6 +229,7 @@ import store from "@/store";
 import Toast from "@/plugins/toast";
 
 
+let isAdmin = ref(store.state.user.access === 'admin')
 let refresh = ref(false)
 let btnLoading = ref(false)
 let loading = ref(false)

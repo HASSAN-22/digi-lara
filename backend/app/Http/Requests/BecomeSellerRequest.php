@@ -67,7 +67,8 @@ class BecomeSellerRequest extends FormRequest
         if($this->request->get('seller_type') === 'legal'){
             return [
               'national_identity_number.required'=>'فیلد شناسه ملی الزامی است',
-              'national_identity_number.numeric'=>'فیلد شناسه ملی باید عدد باشد'
+              'national_identity_number.numeric'=>'فیلد شناسه ملی باید عدد باشد',
+              'national_identity_number.digits'=>'فیلد شناسه ملی باید 11 رقم باشد'
             ];
         }else{
             return [

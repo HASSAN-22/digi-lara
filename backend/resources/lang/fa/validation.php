@@ -241,6 +241,7 @@ return [
         'shop_front_url'=>'لینک فرات فروشگاه',
         'comment_rule'=>'قوانین ثبت دیدگاه',
         'problem_description'=>'توضیح مشکلات',
-        'percent'=>'درصد تخفیف'
+        'percent'=>'درصد تخفیف',
+        'national_identity_number'=>'شناسه ملی',
     ],
 ];

@@ -235,6 +235,15 @@
 
             <ul v-if="$store.state.user.access === 'seller'">
               <DashboardAside
+                  icon="far fa-flag"
+                  :tab="2"
+                  menu="برند ها"
+                  :submenus="[
+                      {id:1, title:'لیست برندها', route:{name:'Brand'}},
+                  ]"
+              />
+
+              <DashboardAside
                   icon="far fa-cube"
                   :tab="11"
                   menu="کالاها"
