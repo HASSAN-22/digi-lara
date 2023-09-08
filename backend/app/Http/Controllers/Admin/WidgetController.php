@@ -30,7 +30,7 @@ class WidgetController extends Controller
             $this->authorize('viewAny',Widget::class);
             $widget = Widget::first();
         }
-        $products = ProductService::product()->published()->activeSeller()->get();
+        $products = ProductService::product()->published()->activeSeller()->where(['amazing_offer_status','=','yes'])->get();
         $categories = CategoryService::category()->active()->where(['type',CategoryTypeEnum::CATEGORY])->get();
         $parents = (clone $categories)->where('parent_id','0')->values();
         $categoryHaveProducts = (clone $categories)->filter(fn($item)=>$item->children->count() <= 0)->values();
