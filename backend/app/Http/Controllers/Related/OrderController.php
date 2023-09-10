@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Related;
 use App\Enums\IsSelectedAddressEnum;
 use App\Enums\PublishEnum;
 use App\Enums\ShippingEnum;
+use App\Enums\StatusEnum;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\OrderDetailResource;
 use App\Http\Resources\OrderDetailReturnedResource;
@@ -32,10 +33,11 @@ class OrderController extends Controller
     public function invoice(Order $order){
         $this->authorize('view',$order);
         $user = auth()->user();
-        $order = $order->where('id',$order->id)->with(['orderDetails'])->first();
-        $sellerInfo = json_decode(Shopconfig::getValue('legal_info')->value,true);
-        $sellerInfo['ir_company_type'] = typeService($sellerInfo['company_type'])->companyType('fa')->get();
-        $buyer = $user->where('id',$user->id)->with(['profile','legalInfo'])->first();
+        $userId = $user->isAdmin() ? $order->user_id : $user->id;
+        $order = $order->where('id',$order->id)->with(['orderDetails'=>fn($q)=>$q->with(['user'=>fn($q)=>$q->whereRelation('becomeSellers','status',StatusEnum::ACTIVE)->with('becomeSellers')])])->first();
+        $shopInfo = json_decode(Shopconfig::getValue('legal_info')->value,true);
+        $shopInfo['ir_company_type'] = typeService($shopInfo['company_type'])->companyType('fa')->get();
+        $buyer = User::with(['profile','legalInfo'])->find($userId);
         $order['ir_created_at'] = dateToPersian($order->created_at);
         $buyerInfo = [
             'name'=>$buyer->name,
@@ -45,7 +47,7 @@ class OrderController extends Controller
             'address'=>json_decode($order->address),
         ];
         $shopSetting = json_decode(Shopconfig::getValue('store_detail')->value,true);
-        return response(['status'=>'success','data'=>['order'=>$order,'seller'=>$sellerInfo,'buyer'=>$buyerInfo,'logo'=>$shopSetting['logo']]]);
+        return response(['status'=>'success','data'=>['order'=>$order,'shop_info'=>$shopInfo,'buyer'=>$buyerInfo,'logo'=>$shopSetting['logo']]]);
     }
 
     /**
@@ -81,7 +83,7 @@ class OrderController extends Controller
             ShippingEnum::SUCCESS_PAY_BACK
         ];
 
-        $currentOrders = auth()->user()->orders()->whereNotIn('shipping_status',$exceptStatus)->with(['orderDetails'=>fn($q)=>$q->select('id','order_id','image'),'returned'])->paginate(10);
+        $currentOrders = auth()->user()->orders()->whereNotIn('shipping_status',$exceptStatus)->with(['orderDetails'=>fn($q)=>$q->select('id','order_id','image','amount'),'returned'])->paginate(10);
         return OrderResource::collection($currentOrders);
     }
 
@@ -93,7 +95,7 @@ class OrderController extends Controller
      */
     public function getDelivered(){
         $this->authorize('viewAny',Order::class);
-        $currentOrders = auth()->user()->orders()->where('shipping_status',ShippingEnum::DELIVERED_CUSTOMER)->with(['orderDetails'=>fn($q)=>$q->select('id','order_id','image'),'returned'])->paginate(10);
+        $currentOrders = auth()->user()->orders()->where('shipping_status',ShippingEnum::DELIVERED_CUSTOMER)->with(['orderDetails'=>fn($q)=>$q->select('id','order_id','image','amount'),'returned'])->paginate(10);
         return OrderResource::collection($currentOrders);
     }
 
@@ -117,7 +119,7 @@ class OrderController extends Controller
      */
     public function getCanceled(){
         $this->authorize('viewAny',Order::class);
-        $currentOrders = auth()->user()->orders()->whereIn('shipping_status',[ShippingEnum::AUTO_CANCELLED,ShippingEnum::CANCELLED])->with(['orderDetails'=>fn($q)=>$q->select('id','order_id','image'),'returned'])->paginate(10);
+        $currentOrders = auth()->user()->orders()->whereIn('shipping_status',[ShippingEnum::AUTO_CANCELLED,ShippingEnum::CANCELLED])->with(['orderDetails'=>fn($q)=>$q->select('id','order_id','image','amount'),'returned'])->paginate(10);
         return OrderResource::collection($currentOrders);
     }
 
@@ -138,7 +140,7 @@ class OrderController extends Controller
             ShippingEnum::PENDING_PAY_BACK,
             ShippingEnum::SUCCESS_PAY_BACK
         ];
-        $currentOrders = $this->orderQuery()->whereNotIn('shipping_status',$exceptStatus)->with(['orderDetails'=>fn($q)=>$q->select('id','order_id','image'),'returned'])->paginate(10);
+        $currentOrders = $this->orderQuery()->whereNotIn('shipping_status',$exceptStatus)->with(['orderDetails'=>fn($q)=>$q->select('id','order_id','image','amount'),'returned'])->paginate(10);
         return OrderResource::collection($currentOrders);
     }
 
@@ -150,7 +152,7 @@ class OrderController extends Controller
      */
     public function getCustomerDelivered(){
         $this->authorize('viewAnyAdminOrSeller',Order::class);
-        $currentOrders = $this->orderQuery()->where('shipping_status',ShippingEnum::DELIVERED_CUSTOMER)->with(['orderDetails'=>fn($q)=>$q->select('id','order_id','image'),'returned'])->paginate(10);
+        $currentOrders = $this->orderQuery()->where('shipping_status',ShippingEnum::DELIVERED_CUSTOMER)->with(['orderDetails'=>fn($q)=>$q->select('id','order_id','image','amount'),'returned'])->paginate(10);
         return OrderResource::collection($currentOrders);
     }
 
@@ -174,7 +176,7 @@ class OrderController extends Controller
      */
     public function getCustomerCanceled(){
         $this->authorize('viewAnyAdminOrSeller',Order::class);
-        $currentOrders = $this->orderQuery()->whereIn('shipping_status',[ShippingEnum::AUTO_CANCELLED,ShippingEnum::CANCELLED])->with(['orderDetails'=>fn($q)=>$q->select('id','order_id','image'),'returned'])->paginate(10);
+        $currentOrders = $this->orderQuery()->whereIn('shipping_status',[ShippingEnum::AUTO_CANCELLED,ShippingEnum::CANCELLED])->with(['orderDetails'=>fn($q)=>$q->select('id','order_id','image','amount'),'returned'])->paginate(10);
         return OrderResource::collection($currentOrders);
     }
 
@@ -234,6 +236,7 @@ class OrderController extends Controller
                 }
             }
             $order->save();
+            $order->orderDetails()->update(['shipping_status'=>$request->shipping_status]);
             DB::commit();
             return response(['status'=>'success'],201);
         }catch (\Exception $e){

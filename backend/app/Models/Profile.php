@@ -23,7 +23,7 @@ class Profile extends Model
     ];
 
     public function getIrBirthDayAttribute(){
-        return dateToPersian($this->birth_day);
+        return !is_null($this->birth_day) ? dateToPersian($this->birth_day) : null;
     }
 
     public function user(){

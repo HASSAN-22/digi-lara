@@ -31,12 +31,11 @@ class CouponService
      * Checks if the coupon is valid for the category or not
      * @return bool
      */
-    public static function validForCategory(): bool
+    public static function validForCategory():bool
     {
-        $categories = Category::whereRelation('products.baskets',fn($q)=>$q->where('user_id',6))->get(['id'])
-            ->map(fn($category)=>array_map(fn($item)=>$item['id'],CategoryService::columns(['id'])->categoryParents($category)->get()));
-
-        $categoryIds = array_unique(call_user_func_array('array_merge', $categories->toArray()));;
+        $categories = Category::whereRelation('products.baskets',fn($q)=>$q->where('user_id',auth()->Id()))->get(['id'])
+            ->map(fn($category)=>array_map(fn($item)=>$item['id'],CategoryService::category()->findById($category->id)->parents('id')->toArray()));
+        $categoryIds = array_unique(call_user_func_array('array_merge', $categories->toArray()));
         return !is_null(self::$coupon->couponCategories()->whereIn('category_id',$categoryIds)->first());
     }
 
@@ -46,6 +45,7 @@ class CouponService
      */
     public static function validForProduct(): bool
     {
+
         $productIds = auth()->user()->baskets()->whereRelation('product',fn($q)=>$q->whereNull('amazing_offer_status')
             ->orWhere('amazing_offer_status',StatusEnum::PENDING)->whereNull('amazing_price'))
             ->get(['product_id'])->map(fn($item)=>$item['product_id'])->toArray();

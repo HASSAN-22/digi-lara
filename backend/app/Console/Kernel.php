@@ -15,6 +15,7 @@ class Kernel extends ConsoleKernel
         $schedule->command('shop:amazing-product')->everyMinute();
         $schedule->command('shop:notify-exists')->at('00:00');
         $schedule->command('shop:cancel-order')->cron('*/2 * * * *');
+        $schedule->command('shop:reset-amazing-offer')->everyFourMinutes();
         $schedule->command('queue:work --stop-when-empty')
             ->everyMinute()
             ->withoutOverlapping();

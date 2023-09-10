@@ -20,6 +20,7 @@ class WalletResource extends JsonResource
             'amount'=>number_format($this->amount),
             'ref_id'=>$this->ref_id,
             'status'=>typeService($this->status)->transactionStatus('fa')->get(),
+            'paid_by'=>typeService($this->paid_by)->transactionPaidBy('fa')->get(),
             'created_at'=>dateToPersian($this->created_at)
         ];
     }

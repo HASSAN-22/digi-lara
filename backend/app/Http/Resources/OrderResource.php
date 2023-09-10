@@ -19,6 +19,8 @@ class OrderResource extends JsonResource
         $largeImageSize = config('app.large_image_size');
         $smallImageSize = config('app.small_image_size');
         $diffTime = $this->created_at->addHours(1)->diff();
+        $amount = $this->orderDetails->sum('amount');
+        Log::info($amount);
         return [
             'id'=>$this->id,
             'user_id'=>$this->user_id,
@@ -31,7 +33,7 @@ class OrderResource extends JsonResource
             'created_at'=>dateToPersian($this->created_at),
             'time_left'=>$diffTime->h > 0 ? 0 : $diffTime->i,
             'can_returned'=>$this->created_at->addDays(config('app.returned_day')) > now(),
-            'amount'=>number_format(abs($this->orderDetails->sum('amount') - $this->reduced_wallet)),
+            'amount'=>number_format($this->orderDetails->sum('amount') + $this->transport_cost),
             'order_details'=>$this->orderDetails->map(fn($item)=>str_replace("{$largeImageSize}x{$largeImageSize}_","{$smallImageSize}x{$smallImageSize}_",$item->image))
         ];
     }

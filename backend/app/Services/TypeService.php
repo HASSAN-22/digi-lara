@@ -8,6 +8,7 @@ use App\Enums\CategoryTypeEnum;
 use App\Enums\CompanyTypeEnum;
 use App\Enums\CouponTypeEnum;
 use App\Enums\DebtorStatusEnum;
+use App\Enums\PaidByEnum;
 use App\Enums\SentStatusEnum;
 use App\Enums\GenderEnum;
 use App\Enums\IsLockedEnum;
@@ -310,6 +311,28 @@ class TypeService
                 'پرداخت شد'=>StatusEnum::ACTIVE->value,
                 'پرداخت نشد'=>StatusEnum::DEACTIVATED->value,
                 'در انتظار پرداخت'=>StatusEnum::PENDING->value,
+                default =>  $this->data,
+            };
+        }
+        return $this;
+    }
+
+    /**
+     * Convert Persian `transaction status` to English or vice versa
+     * @param string $lang
+     * @return $this
+     */
+    public function transactionPaidBy(string $lang = 'en'){
+        if($lang == 'fa'){
+            $this->data = match ($this->data){
+                PaidByEnum::USER->value => 'کاربر',
+                PaidByEnum::ADMIN->value => 'ادمین',
+                default =>  $this->data,
+            };
+        }else{
+            $this->data = match ($this->data){
+                'کاربر'=>PaidByEnum::USER->value,
+                'ادمین'=>PaidByEnum::ADMIN->value,
                 default =>  $this->data,
             };
         }

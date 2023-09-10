@@ -23,7 +23,7 @@ class Transaction extends Model
         $search = trim(request()->get('search'));
         if($search != ''){
             $user = auth()->user();
-            $search = typeService($search)->transactionStatus('en')->fixPriceFormat()->get();
+            $search = typeService($search)->transactionStatus('en')->transactionPaidBy('en')->fixPriceFormat()->get();
             $query = $query->where('ref_id','like',"%$search%")->orWhere('amount',$search)
                 ->orWhere('status',$search);
             if(!$user->isAdmin()){

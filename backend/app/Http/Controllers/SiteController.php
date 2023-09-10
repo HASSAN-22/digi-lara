@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Enums\AvailableEnum;
 use App\Enums\CategoryTypeEnum;
+use App\Enums\IsSelectedAddressEnum;
 use App\Enums\PublishEnum;
 use App\Enums\ShippingEnum;
 use App\Enums\SmsTypeEnum;
@@ -46,6 +47,7 @@ use App\Services\SMS\SmsService;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class SiteController extends Controller
 {
@@ -174,19 +176,25 @@ class SiteController extends Controller
         $withProduct = json_decode($request->with_product);
         $withCount = json_decode($request->with_count);
         $productColumns = ['guarantee_id','brand_id','category_id','physical_weight','image','ir_name','amazing_offer_percent','amazing_offer_status','count','amazing_offer_expire','amazing_price','price','id'];
-        $query = BasketService::setProductColumns($productColumns)
-            ->withCoupon($withCoupon);
+
+        $relations = [
+            'productSize'=>fn($q)=>$q->with('size'),
+            'productColor'=>fn($q)=>$q->with('color'),
+            'coupon'=>fn($q)=>$q->with(['couponProducts','couponCategories'=>fn($q)=>$q->with('category')]),
+            'product'
+        ];
+
         if($withProduct){
-            $query->productWith([
+            $relations['product'] = fn($q)=>$q->select($productColumns)->with([
                 'guarantee'=>fn($q)=>$q->select('id','guarantee'),
                 'brand'=>fn($q)=>$q->select('id','name'),
                 'category'=>fn($q)=>$q->select('id','weight_type')
             ]);
         }
-        $query = $query->baskets(auth()->user())
-            ->removeFinishedItems();
-        $result = $withCount ? $query->calcAmount()->get() : $query->get();
-        return response(['status'=>'success','data'=>$result]);
+
+        $query = BasketService::basket()->forUser(auth()->Id())->relations($relations);
+        $baskets = $withCount ? $query->calcAmount($withCoupon) : $query;
+        return response(['status'=>'success','data'=>$baskets->get()->toArray()]);
     }
 
     /**
@@ -195,17 +203,24 @@ class SiteController extends Controller
      */
     public function addOrder(Request $request){
         $user = auth()->user();
-        $productColumns = ['ir_name','image','user_id','category_id','physical_weight','amazing_offer_percent','amazing_offer_status','count','amazing_offer_expire','amazing_price','price','id','category_id'];
-        $result = BasketService::setProductColumns($productColumns)
-            ->withCoupon(true)->productWith(['category'=>fn($q)=>$q->select('id','commission','weight_type')])->baskets($user)
-            ->removeFinishedItems()->get();
-
+        $productColumns = ['ir_name','image','user_id','category_id','brand_id','physical_weight','amazing_offer_percent','amazing_offer_status','count','amazing_offer_expire','amazing_price','sku','price','id'];
+        $relations = [
+            'productSize'=>fn($q)=>$q->with('size'),
+            'productColor'=>fn($q)=>$q->with('color'),
+            'coupon'=>fn($q)=>$q->with(['couponProducts','couponCategories'=>fn($q)=>$q->with('category')]),
+            'product'=>fn($q)=>$q->select($productColumns)->with([
+                'brand'=>fn($q)=>$q->select('id','name'),
+                'category'=>fn($q)=>$q->select('id','commission','weight_type')
+            ])
+        ];
+        $baskets = BasketService::basket()->forUser(auth()->Id())->relations($relations)->calcAmount(true)->get();
+        unset($baskets['amount']);
         DB::beginTransaction();
         try {
-            $weightType = $result['baskets']->unique('product.category.weight_type')->pluck('product.category.weight_type')->toArray();
+            $weightType = $baskets->unique('product.category.weight_type')->pluck('product.category.weight_type')->filter()->toArray();
             $transportAmount = Transport::whereIn('weight_type',$weightType)->get()->sum('fixed_price');
             $wallet = $user->wallet;
-            $address = $user->addresses()->where('addresses','yes')->with(['province','city'])->first();
+            $address = $user->addresses()->where('is_selected',IsSelectedAddressEnum::YES)->with(['province','city'])->first();
             $order = Order::create([
                 'user_id'=>$user->id,
                 'shipping_status'=>ShippingEnum::PAYMENT_PENDING,
@@ -226,12 +241,12 @@ class SiteController extends Controller
             $orderDetails = [];
             $couponUserIds = [];
             $fullAmount = 0;
-            foreach($result['baskets'] as $basket){
+            foreach($baskets as $basket){
                 $product = $basket->product;
-                $discount = BasketService::getDiscount($basket);
+                $basketAmountData = BasketService::basket($basket)->calcAmount(true)->get()['amount'];
                 $property = BasketService::getPropertyAmount($basket);
-                $couponUserIds[] = $discount['couponIds'];
-                $fullAmount += $discount['amount'];
+                $couponUserIds[] = $basketAmountData['couponIds'];
+                $fullAmount += $basketAmountData['fullAmount'];
                 $orderDetails[] = [
                     'user_id'=>$product->user_id,
                     'order_id'=>$order->id,
@@ -242,13 +257,13 @@ class SiteController extends Controller
                     'price'=>$product->price,
                     'image'=>$product->image,
                     'count'=>$basket->count,
-                    'discount'=>$discount['discount'],
-                    'discount_type'=>$discount['type'],
+                    'discount'=>$basketAmountData['discount'],
+                    'discount_type'=>$basketAmountData['couponType'],
                     'property_type'=>$property['type'],
                     'property_name'=>$property['name'],
                     'property_price'=>$property['amount'],
                     'property_color'=>$property['colorCode'],
-                    'amount'=>$discount['amount'],
+                    'amount'=>$basketAmountData['fullAmount'],
                     'commission'=>$product->category->commission,
                     'shipping_status'=>ShippingEnum::PAYMENT_PENDING,
                     'created_at'=>now(),
@@ -263,9 +278,10 @@ class SiteController extends Controller
             $fullAmount += $transportAmount;
             $user->baskets()->delete();
             if($request->use_wallet and $wallet->amount > 0){
-                $result = $wallet->amount - $fullAmount;
+                $result = $fullAmount < $wallet->amount ? $fullAmount % $wallet->amount : $wallet->amount % $fullAmount;
+
                 $order->update(['reduced_wallet'=>$result > 0 ? $result : $wallet->amount]);
-                $wallet->update(['amount'=> max($result, 0)]);
+                $wallet->update(['amount'=> $result > 0 ? DB::raw("amount - {$result}") : 0]);
             }
             $fullAmount = $fullAmount - $order->reduced_wallet;
             if($fullAmount <= 0){
@@ -885,7 +901,7 @@ class SiteController extends Controller
      */
     public function specialProduct(Request $request){
         $specialProduct = ProductService::product()->withRelations(['productComments'])->published()->activeSeller()
-            ->whereNotNull('amazing_price')->where('amazing_offer_status','!=','yes')
+            ->whereNotNull('amazing_price')->whereNull('amazing_offer_status')->orWhere('amazing_offer_status','=',StatusEnum::PENDING)
             ->get()->map(function($item){
                 $item['rating'] = $this->calcProductRating($item->productComments)[1];
                 return $item->only('id','image','ir_name','count','price','amazing_price','amazing_offer_percent','slug','amazing_offer_status','amazing_offer_expire','rating');

@@ -7,6 +7,7 @@ use App\Enums\StatusEnum;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\WalletRequest;
 use App\Http\Resources\WalletResource;
+use App\Models\Transaction;
 use App\Models\Wallet;
 use App\Services\Bank\Payment;
 use Illuminate\Http\Request;
@@ -21,7 +22,9 @@ class WalletController extends Controller
     public function index()
     {
         $this->authorize('viewAny',Wallet::class);
-        $transaction = auth()->user()->transactions('Wallet')->search()->with(['user'=>fn($q)=>$q->select('id','name')])->paginate(10);
+        $user = auth()->user();
+        $query = $user->isAdmin() ? (new Transaction())->where('transactionable_type','App\Models\Wallet') : $user->transactions('Wallet');
+        $transaction = $query->search()->with(['user'=>fn($q)=>$q->select('id','name')])->paginate(10);
         return WalletResource::collection($transaction);
     }
 

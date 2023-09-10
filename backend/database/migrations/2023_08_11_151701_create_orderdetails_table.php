@@ -31,6 +31,9 @@ return new class extends Migration
             $table->string('shipping_status');
             $table->integer('commission');
             $table->timestamps();
+            $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade')->onUpdate('cascade');
+            $table->foreign('order_id')->references('id')->on('orders')->onDelete('cascade')->onUpdate('cascade');
+
         });
     }
 

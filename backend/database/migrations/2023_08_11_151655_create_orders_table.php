@@ -19,6 +19,7 @@ return new class extends Migration
             $table->integer('reduced_wallet');
             $table->text('address');
             $table->timestamps();
+            $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade')->onUpdate('cascade');
         });
     }
 
