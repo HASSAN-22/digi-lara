@@ -16,6 +16,7 @@ use App\Models\Product;
 use App\Models\Returned;
 use App\Models\Shopconfig;
 use App\Models\User;
+use App\Services\Bank\Payment;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\DB;
@@ -315,6 +316,17 @@ class OrderController extends Controller
             DB::rollBack();
             return response(['status'=>'error'],500);
         }
+    }
+
+    /**
+     * @param Order $order
+     * @return \Illuminate\Contracts\Foundation\Application|\Illuminate\Contracts\Routing\ResponseFactory|\Illuminate\Foundation\Application|Response
+     * @throws \Exception
+     */
+    public function payOrder(Order $order){
+        $amount = $order->orderDetails->sum('amount');
+        $redirectUrl = Payment::driver('Zibal')->request(setGateway((int) $amount, (int) $order->id, $order->user->mobile, 'order'));
+        return response(['status'=>'success','data'=>['redirect_url'=>$redirectUrl]]);
     }
 
     /**

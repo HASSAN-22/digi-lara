@@ -3,15 +3,14 @@
 namespace App\Http\Controllers\Related;
 
 use App\Enums\DebtorStatusEnum;
-use App\Enums\PaidByEnum;
 use App\Enums\StatusEnum;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\DebtorResource;
 use App\Models\Debtor;
-use App\Models\Transaction;
+use App\Services\Bank\Payment;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Psy\Util\Str;
+use Illuminate\Support\Str;
 
 class DebtorController extends Controller
 {
@@ -36,24 +35,20 @@ class DebtorController extends Controller
         $this->authorize('pay',$debtor);
         DB::beginTransaction();
         try {
+            $redirectUrl = null;
             $user = auth()->user();
             if($request->pay_type == 'wallet'){
                 $wallet = $user->wallet;
                 if($wallet->amount > $debtor->amount){
-                    $debtor->transactions()->create([
-                        'user_id'=>$user->id,
-                        'amount'=>$debtor->amount,
-                        'ref_id'=> \Illuminate\Support\Str::random(8),
-                        'status'=>StatusEnum::ACTIVE,
-                        'paid_by'=>PaidByEnum::USER,
-                    ]);
+                    insertTransaction($debtor, (int) $user->id, (int) $debtor->amount, Str::random(8));
                     $debtor->update(['amount'=>0,'status'=>DebtorStatusEnum::SETTLED]);
                     DB::commit();
                     return response(['status'=>'success'],201);
                 }
                 return response(['status'=>'success','msg'=>'موجودی کیف پول کافی نیست'],500);
             }else{
-                // connect to bank
+                $redirectUrl = Payment::driver('Zibal')->request(setGateway($debtor->amount, $debtor->id, $user->mobile, 'debtor'));
+                return response(['status'=>'success','data'=>['redirect_url'=>$redirectUrl]]);
             }
         }catch (\Exception $e){
             DB::rollBack();

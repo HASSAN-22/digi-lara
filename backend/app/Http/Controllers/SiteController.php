@@ -5,10 +5,12 @@ namespace App\Http\Controllers;
 use App\Enums\AvailableEnum;
 use App\Enums\CategoryTypeEnum;
 use App\Enums\IsSelectedAddressEnum;
+use App\Enums\PaidByEnum;
 use App\Enums\PublishEnum;
 use App\Enums\ShippingEnum;
 use App\Enums\SmsTypeEnum;
 use App\Enums\StatusEnum;
+use App\Enums\YesOrNoEnum;
 use App\Http\Requests\ContactRequest;
 use App\Models\Address;
 use App\Models\Amazingalert;
@@ -36,6 +38,7 @@ use App\Models\Wishlist;
 use App\Models\Product;
 use App\Models\Slider;
 use App\Models\Widget;
+use App\Services\Bank\Payment;
 use App\Services\BasketService;
 use App\Services\CategoryService;
 use App\Services\CommentService;
@@ -48,6 +51,7 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str;
 
 class SiteController extends Controller
 {
@@ -226,6 +230,7 @@ class SiteController extends Controller
                 'shipping_status'=>ShippingEnum::PAYMENT_PENDING,
                 'transport_cost'=>$transportAmount,
                 'reduced_wallet'=>0,
+                'pay_to_seller'=>YesOrNoEnum::NO,
                 'address'=>json_encode([
                     'receiver'=>$address->receiver_name . ' ' . $address->receiver_last_name,
                     'address'=>$address->address,
@@ -283,17 +288,18 @@ class SiteController extends Controller
                 $order->update(['reduced_wallet'=>$result > 0 ? $result : $wallet->amount]);
                 $wallet->update(['amount'=> $result > 0 ? DB::raw("amount - {$result}") : 0]);
             }
-            $fullAmount = $fullAmount - $order->reduced_wallet;
-            if($fullAmount <= 0){
+            $amount = $fullAmount - $order->reduced_wallet;
+            if($amount <= 0){
                 $order->update(['shipping_status'=>ShippingEnum::REVIEW_QUEUE]);
                 $order->orderDetails()->update(['shipping_status'=>ShippingEnum::REVIEW_QUEUE]);
+                insertTransaction($order, (int) $user->id, (int) $fullAmount, Str::random(8));
             }
             DB::commit();
-            if($fullAmount > 0){
-                // to bank
-            }else{
-                return response(['status'=>'success'],201);
+            $redirectUrl = null;
+            if($amount > 0){
+                $redirectUrl = Payment::driver('Zibal')->request(setGateway((int) $amount, (int) $order->id, $user->mobile, 'order'));
             }
+            return response(['status'=>'success', 'data'=>['redirect_url'=>$redirectUrl]],201);
         }catch (\Exception $e){
             DB::rollBack();
             return response(['status'=>'error','e'=>[$e->getMessage(),$e->getLine(), $e->getTrace()]],500);

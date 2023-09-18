@@ -73,6 +73,7 @@ export default createStore({
     basketDiscount:0,
     basketOriginalAmount:0,
     discounts:0,
+    couponDiscount:0,
     validationErrorModal:false,
     basketLoading:false,
     basketLoadingAction:false,
@@ -159,7 +160,6 @@ export default createStore({
       state.basketCount = 0;
       state.baskets = [];
       state.basketAmount = 0;
-      state.basketDiscount = 0;
       state.basketOriginalAmount = 0;
       state.discounts = 0;
       state.transportAmount = 0;
@@ -254,11 +254,13 @@ export default createStore({
       state.basketLoading = loading;
       await axios.get(`${state.api}get-basket?with_coupon=${withCoupon}&with_count=${withCount}&with_product=${withProduct}`).then(resp=>{
         let data = resp.data.data;
-        state.baskets = data.baskets;
-        state.basketAmount = data.amount;
-        state.basketDiscount = data.discount;
-        state.basketOriginalAmount = data.originalAmount;
-      }).catch(err=>{})
+        let amount = data['amount'];
+        delete data['amount'];
+        state.baskets = Object.values(data);
+        state.basketAmount = amount.fullAmount;
+        state.couponDiscount = amount.couponDiscount;
+        state.basketOriginalAmount = amount.originalAmount;
+      }).catch(err=>{console.log(err)})
       state.basketLoading = false;
     },
     async removeBasket({state,dispatch},{basketId, showBasket,withCount=false,withProduct=false}){

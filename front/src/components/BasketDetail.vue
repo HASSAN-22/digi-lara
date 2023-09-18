@@ -1,16 +1,16 @@
 <template>
   <div class="flex gap-[1rem]">
     <div class="flex flex-col">
-      <div class="flex flex-col justify-between gap-3">
+      <div class="relative flex flex-col justify-between gap-3">
         <div class="flex flex-col items-center">
-          <div :class="[imageSize]">
-            <img :src="$store.state.url + basket.product.image.replace(`${$store.state.largeSize}x${$store.state.largeSize}_`,`${$store.state.smallSize}x${$store.state.smallSize}_`)"/>
-          </div>
-          <div class="absolute top-0" v-if="basket.product.amazing_offer_status === 'yes'">
+          <div v-if="basket.product.amazing_offer_status === 'yes'">
             <img src="@/assets/images/IncredibleOffer.svg" />
           </div>
           <div class="" v-else-if="basket.product.amazing_price !== null">
             <img src="@/assets/images/SpecialSell.svg" />
+          </div>
+          <div :class="[imageSize]">
+            <img :src="$store.state.url + basket.product.image.replace(`${$store.state.largeSize}x${$store.state.largeSize}_`,`${$store.state.smallSize}x${$store.state.smallSize}_`)"/>
           </div>
         </div>
         <div class="w-[85%] border border-gray-200 p-2 flex items-center gap-1 justify-evenly  rounded-lg">
@@ -137,7 +137,7 @@ const getPrice = computed(()=>{
   }else{
     amount.value = product.price*count
   }
-  return {discount:store.getters.numberFormat(discountAmount.value), amount:store.getters.numberFormat(amount.value)}
+  return {discount:store.getters.numberFormat(Math.abs(discountAmount.value)), amount:store.getters.numberFormat(amount.value)}
 })
 
 const discount = computed(()=>(price, discount)=>{

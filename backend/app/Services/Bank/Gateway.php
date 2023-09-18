@@ -11,17 +11,17 @@ interface Gateway{
 	*
 	* Send the transaction to the bank portal
 	* @param array $gatewayInfo
-    * @return RedirectResponse|void
+    * @return string
     * @throws \Exception
 	*/
-    public static function request(array $gatewayInfo);
+    public static function request(array $gatewayInfo): string;
 
 	/**
 	*
 	* Checking the transaction result
 	* @param array $responseInfo
-    * @return RedirectResponse|void
+    * @return array
     * @throws \Exception
 	*/
-	public static function verify(array $responseInfo);
+	public static function verify(array $responseInfo): array;
 }

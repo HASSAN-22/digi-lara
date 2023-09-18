@@ -78,6 +78,7 @@ class ShopconfigController extends Controller
         setEnvironmentValue([
             'APP_NAME'=>"'".$request->shop_name."'",
             'APP_URL'=>$request->shop_url,
+            'FRONT_URL'=> str_ends_with($request->shop_front_url, '/') ? $request->shop_front_url : $request->shop_front_url.'/',
             'SANCTUM_STATEFUL_DOMAINS'=>$host,
             'SESSION_DOMAIN'=>".{$host}",
         ]);

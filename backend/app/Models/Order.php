@@ -15,6 +15,7 @@ class Order extends Model
       'transport_cost',
       'reduced_wallet',
       'address',
+      'pay_to_seller',
     ];
 
     public function user(){

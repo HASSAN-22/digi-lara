@@ -145,7 +145,7 @@ async function getAddresses(_loading=true){
     allAddresses.value = data.addresses;
     provinces.value = data.provinces
     currentAddress.value = allAddresses.value.filter(item=>item.is_selected === 'yes');
-    selectedAddressId.value = currentAddress.value.id;
+    selectedAddressId.value = currentAddress.value.length > 0 ? currentAddress.value[0].id : null;
   }).catch(err=>{})
   loading.value = false;
 }
@@ -183,12 +183,12 @@ async function chooseAddress(){
 }
 
 async function addAddress(){
-  clearForm();
   btnLoading.value = true;
   await axios.post(`${store.state.api}address`,setForm()).then(async resp=>{
     await getAddresses();
     addressModal.value.toggleModal();
     Toast.success();
+    clearForm();
     store.state.addressComponentKey++;
   }).catch(err=>{
     store.commit('handleError',err)

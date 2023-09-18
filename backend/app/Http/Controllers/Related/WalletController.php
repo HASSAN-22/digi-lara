@@ -11,7 +11,6 @@ use App\Models\Transaction;
 use App\Models\Wallet;
 use App\Services\Bank\Payment;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
 class WalletController extends Controller
@@ -35,35 +34,12 @@ class WalletController extends Controller
     public function store(WalletRequest $request)
     {
         $this->authorize('create',Wallet::class);
-        DB::beginTransaction();
-        try{
-            $user = auth()->user();
-            $wallet = Wallet::updateOrcreate(['user_id'=>$user->id],['amount'=>DB::raw("amount + {$request->amount}")]);
-            $wallet->transactions()->create([
-               'user_id'=>$user->id,
-               'amount'=>$request->amount,
-               'ref_id'=>Str::random(8),
-               'status'=>StatusEnum::ACTIVE,
-               'paid_by'=>PaidByEnum::USER,
-            ]);
-            DB::commit();
-            return response(['status'=>'success'],201);
-        }catch (\Exception $e){
-            DB::rollBack();
-            return response(['status'=>'error'],500);
-        }
-    //c3d69a91-a58f-46de-9f1e-2dd32e8ac8e2
-//        $data = [
-//            'merchantId' 		=> 'c3d69a91-a58f-46de-9f1e-2dd32e8ac8e2',
-//            'amount' 			=> $request->amount,
-//            'callback' 		=> route('transaction.verify',['type'=>'wallet']),
-//        ];
-//
-//        try{
-//            Payment::driver(config('app.payment_driver'))->request($data);
-//        }catch (\Exception $e){
-//            return response(['status'=>'error','msg'=>$e->getMessage()],500);
-//        }
+        $user = auth()->user();
+        $wallet = Wallet::firstOrNew(['user_id'=>$this->user->id]);
+        $wallet->amount = $wallet->amount ?? 0;
+        $wallet->save();
+        $redirectUrl = Payment::driver('Zibal')->request(setGateway($request->amount, $wallet->id, $user->mobile, 'wallet'));
+        return response(['status'=>'success','data'=>['redirect_url'=>$redirectUrl]]);
     }
 
     /**

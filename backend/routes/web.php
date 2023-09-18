@@ -1,5 +1,6 @@
 <?php
 
+use App\Services\Bank\Payment;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -13,6 +14,7 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::get('/', function () {
-    return view('welcome');
+Route::get('/bank', function () {
+    $redirectUrl = Payment::driver('Zibal')->request(setGateway(2000, 1, '09168963472', 'www'));
+    return redirect()->to($redirectUrl)->send();
 });

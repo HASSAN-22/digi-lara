@@ -33,7 +33,7 @@ class OrderResource extends JsonResource
             'created_at'=>dateToPersian($this->created_at),
             'time_left'=>$diffTime->h > 0 ? 0 : $diffTime->i,
             'can_returned'=>$this->created_at->addDays(config('app.returned_day')) > now(),
-            'amount'=>number_format($this->orderDetails->sum('amount') + $this->transport_cost),
+            'amount'=>number_format($this->orderDetails->sum('amount')),
             'order_details'=>$this->orderDetails->map(fn($item)=>str_replace("{$largeImageSize}x{$largeImageSize}_","{$smallImageSize}x{$smallImageSize}_",$item->image))
         ];
     }

@@ -1,5 +1,7 @@
 <?php
 
+use App\Enums\PaidByEnum;
+use App\Enums\StatusEnum;
 use App\Models\Shopconfig;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\App;
@@ -150,5 +152,37 @@ if(! function_exists('getShopConfig')){
         $footerBox = json_decode(Shopconfig::getValue('footer_box')->value??"[]");
         $socialMedia = json_decode(Shopconfig::getValue('social_media')->value??"[]");
         return ['store_detail'=>$storeDetail,'footer_box'=>$footerBox,'social_media'=>$socialMedia];
+    }
+}
+
+/**
+ * Set gateway info
+ */
+if(! function_exists('setGateway')){
+    function setGateway(int $amount, int $orderId, string $mobile, string $action)
+    {
+        return [
+            "merchantId"=>config('services.gateway.merchant_id'),
+            "amount"=>$amount,
+            "callback"=>route('transaction.verify',['action'=>$action]),
+            "orderId"=>$orderId,
+            "mobile"=>$mobile,
+        ];
+    }
+}
+
+/**
+ * Insert a transaction for user
+ */
+if(! function_exists('insertTransaction')){
+    function insertTransaction($post, int $userId, int $amount, int|string $refId, PaidByEnum $paidBy = PaidByEnum::USER)
+    {
+        $post->transactions()->create([
+            'user_id'=>$userId,
+            'amount'=>$amount,
+            'ref_id'=>$refId,
+            'status'=>StatusEnum::ACTIVE,
+            'paid_by'=>$paidBy,
+        ]);
     }
 }

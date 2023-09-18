@@ -24,6 +24,7 @@ return [
     'min_amount' => env('MIN_AMOUNT',''),
     'transport_cost' => env('TRANSPORT_COST',''),
     'returned_day' => env('RETURNED_DAY',''),
+    'front_url' => env('FRONT_URL',''),
     /*
     |--------------------------------------------------------------------------
     | Application Name

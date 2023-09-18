@@ -344,7 +344,7 @@
               <span class="text-2xl fm:text-lg !font-bold">{{$store.state.configSite.shop_name_ir}}</span>
             </div>
             <div>
-              <p class="break-all fm:text-sm">
+              <p class="break-word fm:text-sm">
                 {{$store.state.configSite.shop_bio}}
               </p>
             </div>

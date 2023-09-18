@@ -15,6 +15,9 @@ use Illuminate\Support\Facades\Route;
 
 //################################ Auth routes ######################################
 Route::group([],function(){
+    Route::controller(\App\Http\Controllers\TransactionController::class)->group(function(){
+        route::get('verify','verify')->name('transaction.verify');
+    });
    Route::controller(\App\Http\Controllers\Auth\LoginController::class)->group(function(){
        route::post('login-register','loginOrRegister');
        route::post('logout','logout')->middleware('auth:sanctum');
@@ -30,7 +33,6 @@ Route::group([],function(){
 Route::group([],function(){
 
     Route::controller(\App\Http\Controllers\SiteController::class)->group(function(){
-        route::get('transaction-verify','transactionVerity')->name('transaction.verify');
         route::get('search-product','searchProduct');
         route::post('send-code','sendCode');
         route::post('resend-code','reSendCode');
@@ -261,6 +263,8 @@ Route::group(['middleware'=>'auth:sanctum'],function (){
         Route::get('order/delivered','getDelivered');
         Route::get('order/returned','getReturned');
         Route::get('order/canceled','getCanceled');
+
+        Route::get('order/pay/{order}','payOrder');
 
         Route::get('order/customer-detail/{order}','getCustomerDetail');
         Route::get('order/customer-current','getCustomerCurrent');

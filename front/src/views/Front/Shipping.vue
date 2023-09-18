@@ -60,10 +60,10 @@
                   <span class="text-gray-500 fm:text-sm">{{productAmount}} ریال</span>
                 </div>
 
-                <div class="border-b border-gray-200 w-full" v-if="$store.state.basketDiscount > 0"></div>
-                <div class="flex items-start justify-between" v-if="$store.state.basketDiscount > 0">
+                <div class="border-b border-gray-200 w-full" v-if="$store.state.couponDiscount > 0"></div>
+                <div class="flex items-start justify-between" v-if="$store.state.couponDiscount > 0">
                   <span class="!font-medium fm:text-sm">تخفیف</span>
-                  <span class="!font-medium fm:text-sm">{{$store.getters.numberFormat($store.state.basketDiscount)}} ریال</span>
+                  <span class="!font-medium fm:text-sm">{{$store.getters.numberFormat($store.state.couponDiscount)}} ریال</span>
                 </div>
                 <div class="border-b border-gray-200 w-full"></div>
                 <div class="flex items-start justify-between">
@@ -98,7 +98,7 @@
                 </div>
                 <div class="w-full" v-else>
                   <button class="bg-gray-200 p-3 text-gray-500 w-full text-sm text-center rounded-lg">
-                    {{currentAddress.length <= 0 ? 'ثبت سفارش' : 'لطفا آدرس تحویل سفارش را وارد کنید'}}
+                    {{currentAddress.length <= 0 ? 'لطفا آدرس تحویل سفارش را وارد کنید' : 'ثبت سفارش'}}
                   </button>
                 </div>
               </div>
@@ -164,7 +164,7 @@ watch(() => store.state.addressComponentKey, async function() {
 
 const calcTransportAmount = computed(()=>{
   let amount = 0;
-  let baskets = [...new Map(store.state.baskets.map(item => [item['product']['category']['weight_type'], item])).values()]
+  let baskets = [...new Map(Object.values(store.state.baskets).map(item => [item['product']['category']['weight_type'], item])).values()]
   for(let i =0; i < baskets.length; i++){
     let basket = baskets[i];
     let transport = transports.value.filter(item=>item.weight_type === basket.product.category.weight_type)[0];
@@ -204,7 +204,7 @@ async function getData(_loading=true){
 }
 
 function calcWalletPrice(){
-  totalAmount.value = totalAmount.value - walletAmount.value;
+  totalAmount.value = walletAmount.value > totalAmount.value ? 0 : totalAmount.value - walletAmount.value;
   walletAmount.value = 0;
   useWalletAmount.value = true;
   Toast.success('با موفقییت اعمال شد')
@@ -241,7 +241,8 @@ async function addOrder(){
     setTimeout(()=>{
       Toast.success()
     },2000)
-    window.location.href = '/payment-alert/سفارش با موفقیت ثبت شد'
+    let redirectUrl = resp.data.data.redirect_url;
+    window.location.href = redirectUrl ? redirectUrl : '/payment-alert?status=success&msg=سفارش با موفقیت ثبت شد'
   }).catch(err=>{
     Toast.error('یک خطای غیر منتظره رخ داده است')
   })

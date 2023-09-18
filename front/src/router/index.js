@@ -41,7 +41,7 @@ const routes = [
         component: () => import(/* webpackChunkName: "error" */ '@/views/Front/HandleError.vue')
       },
       {
-        path: '/payment-alert/:msg',
+        path: '/payment-alert',
         name: 'paymentAlert',
         component: () => import(/* webpackChunkName: "payment-alert" */ '@/views/Front/paymentAlert.vue')
       },

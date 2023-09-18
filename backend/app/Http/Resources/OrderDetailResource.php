@@ -28,7 +28,6 @@ class OrderDetailResource extends JsonResource
         $results['superHeavies'] = $this->orderDetails->where('product.category.weight_type','super_heavy')->values();
         $results['styles'] = $this->orderDetails->where('product.category.weight_type','style')->values();
         $details = [];
-        $useReducedWallet = false;
         foreach ($results as $orderDetails){
             if($orderDetails->count() > 0){
                 $orderDetail = $orderDetails[0];
@@ -52,7 +51,6 @@ class OrderDetailResource extends JsonResource
                         return $item;
                     }),
                 ];
-                $useReducedWallet = true;
             }
         }
         return [
@@ -61,7 +59,7 @@ class OrderDetailResource extends JsonResource
             'transport_cost'=>$this->transport_cost,
             'reduced_wallet'=>$this->reduced_wallet,
             'ir_created_at'=>dateToPersian($this->created_at),
-            'amount'=>number_format($amount +$this->transport_cost),
+            'amount'=>number_format($amount),
             'address'=>json_decode($this->address,true),
             'left_time'=>$diffTime->h > 0 ? 0 : $diffTime->i,
             'transaction'=>$transaction,

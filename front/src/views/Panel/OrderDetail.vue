@@ -19,7 +19,7 @@
               <span class="text-orange-500 fm:text-xs">سفارش در صورت عدم پرداخت تا {{order.left_time}} دقیقه دیگر لغو خواهد شد.</span>
             </div>
             <div class="w-full fd:flex fd:justify-end">
-              <Button text="پرداخت" my_class="w-full fd:w-auto fd:!text-sm !p-2"/>
+              <Button @click="pay(order.id)" text="پرداخت" my_class="w-full fd:w-auto fd:!text-sm !p-2"/>
             </div>
           </div>
 
@@ -161,12 +161,6 @@
               <div class="flex flex-col gap-3">
                 <routerLink :to="{name:'ProductDetail', params:{slug:detail.product.slug}}" class="text-md !font-medium fm:text-sm">{{detail.product.ir_name}}</routerLink>
 
-                <div class="flex fm:flex-col fd:items-center gap-8">
-                  <div class="flex fm:justify-between items-center gap-2">
-                    <span class="text-gray-500 fm:text-sm">وضعیت</span>
-                    <span class="fm:text-sm !font-medium" :style="{color:orderDetail.shipping_status_icon.color}">{{orderDetail.ir_shipping_status}}</span>
-                  </div>
-                </div>
                 <div class="flex flex-col items-start justify-start gap-2">
                   <div class="flex items-center gap-2" v-if="detail.property_type === 'size'">
                     <span class="text-gray-500 text-lg fm:text-sm"><i class="far fa-ruler-vertical"></i></span>
@@ -201,7 +195,7 @@
                   <span class="fm:text-sm !font-medium" :style="{color:detail.shipping_status_icon.color}">{{detail.ir_shipping_status}}</span>
                 </div>
               </div>
-              <div  @click="openCommentModal(detail.product.id)" class="flex fm:flex-col fd:items-center gap-2">
+              <div  @click="openCommentModal(detail.product.id)" class="flex fm:flex-col fd:items-center gap-2 cursor-pointer">
                 <span class="!text-blue-400 !border-none !bg-white fm:hidden">ثبت دیدگاه</span>
                 <span class="text-blue-400 text-sm"><i class="far fa-comment"></i></span>
               </div>
@@ -311,7 +305,16 @@ function openCommentModal(_productId){
   commentRef.value.openCommentModal();
 }
 
-
+async function pay(_orderId){
+  btnLoading.value = true;
+  await axios.get(`${store.state.api}order/pay/${_orderId}`).then(async resp=>{
+    let redirectUrl = resp.data.data.redirect_url;
+    window.location.href = redirectUrl ? redirectUrl : '/payment-alert?status=success&msg=سفارش با موفقیت ثبت شد'
+  }).catch(err=>{
+    store.commit('handleError',err)
+  })
+  btnLoading.value = false;
+}
 async function show(_orderDetailId,_weightType){
   orderDetailId.value = _orderDetailId
   weightType.value = _weightType;

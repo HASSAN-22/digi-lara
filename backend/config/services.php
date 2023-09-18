@@ -37,6 +37,12 @@ return [
         'ippanel' => [
             'api_key'=>env('IPPANEL_API_KEY')
         ]
+    ],
+
+    'gateway'=>[
+        'merchant_id'=>env('GATEWAY_MERCHANT_ID'),
+        'username'=>env('GATEWAY_USERNAME'),
+        'password'=>env('GATEWAY_PASSWORD')
     ]
 
 ];

@@ -7,9 +7,9 @@
           <div class="fd:w-[75%] p-2">
             <div class="flex justify-between mb-5">
               <h1 class="text-2xl !font-medium fm:text-lg">سبد خرید</h1>
-              <h1 class="text-gray-500 !font-medium fm:text-sm">{{$store.state.baskets.length}} کالا</h1>
+              <h1 class="text-gray-500 !font-medium fm:text-sm">{{basketLength}} کالا</h1>
             </div>
-            <div v-if="$store.state.baskets.length > 0 && loadeIsDone">
+            <div v-if="basketLength > 0 && loadeIsDone">
               <div  class="border border-gray-200 rounded-lg p-2 flex justify-between mb-2" v-for="basket in $store.state.baskets" :key="basket.id">
                 <BasketDetail :key="basket.id" :basket="basket" :disableGuarantee="false" :disableBrand="false" :showBasket="false" :withCount="true" :withProduct="true" imageSize="w-[120px] h-[120px]" :calcAmount="true" />
                 <div>
@@ -28,7 +28,7 @@
             <div class="fixed sticky top-[9rem] flex-col gap-5">
               <div class="flex flex-col gap-6 border border-gray-200 rounded-lg p-4">
                 <div class="flex items-start justify-between">
-                  <span class="text-gray-500 fm:text-sm">قیمت کالاها ({{$store.state.baskets.length}})</span>
+                  <span class="text-gray-500 fm:text-sm">قیمت کالاها ({{basketLength}})</span>
                   <span class="text-gray-500 fm:text-sm">{{productAmount}} ریال</span>
                 </div>
                 <div class="flex items-start justify-between">
@@ -40,7 +40,7 @@
 
                   <span class="!font-medium text-red-500 fm:text-sm"> ({{calcPercent}}٪) {{$store.getters.numberFormat(price - fullPrice)}} ریال</span>
                 </div>
-                <div v-if="$store.state.baskets.length > 0" class="w-full">
+                <div v-if="basketLength > 0" class="w-full">
                   <routerLink :to="{name:'Shipping'}" id="router-link" class="bg-red-500 p-3 w-full text-white text-sm text-center rounded-lg">مرحله بعد</routerLink>
                 </div>
                 <div v-else class="w-full">
@@ -78,10 +78,11 @@ let loading = ref(false);
 let loadeIsDone = ref(false);
 let price = ref(0)
 let fullPrice = ref(0)
-
+let basketLength = ref(0)
 onMounted(async () => {
   loading.value = true;
   await store.dispatch('getBasket', {loading:true, withCoupon:false, withCount:true,withProduct:true})
+  basketLength.value = store.state.baskets.length;
   loading.value = false;
   loadeIsDone.value = true;
 })

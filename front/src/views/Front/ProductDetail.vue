@@ -28,7 +28,7 @@
             <span class="text-lg !font-medium">{{product.ir_name}}</span>
           </div>
         </div>
-        <div :class="['flex fm:flex-col gap-2',showMoreProperty ? '' : 'items-end']">
+        <div :class="['flex fm:flex-col gap-2']">
           <div class="flex w-[35%] fm:flex-col fm:gap-4 fm:w-[100%] fd:gap-3">
             <ul class="flex flex-col fm:flex-row fm:items-center fm:gap-8 fd:space-y-8">
               <li class="cursor-pointer">
@@ -83,7 +83,7 @@
               </div>
             </div>
           </div>
-          <div class="flex flex-col w-[33%] fm:w-[100%] gap-4 fd:mt-10">
+          <div class="flex flex-col w-[33%] fm:w-[100%] gap-4 fd:mt-10 justify-between">
             <div class="fm:hidden">
               <h5 class="text-sm text-gray-400">{{product.en_name}}</h5>
             </div>
@@ -185,11 +185,11 @@
                 <div class="flex gap-4 border-b justify-between border-gray-300 pb-4">
                   <div class="flex items-center gap-4">
                     <span><i class="far fa-shield-check text-2xl"></i></span>
-                    <span v-if="product.guarantee_month === '1'">
+                    <span v-if="product.guarantee_month === 1">
                     گارانتی مادام العمر {{product.guarantee.guarantee}}
                     </span>
-                    <span v-if="product.guarantee_month === '0'">
-                    گارانتی {{product.guarantee.guarantee}}
+                    <span v-else-if="product.guarantee_month === 0">
+                     {{product.guarantee.guarantee}}
                     </span>
                     <span v-else>
                     گارانتی {{product.guarantee_month}} ماهه {{product.guarantee.guarantee}}

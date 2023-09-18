@@ -74,7 +74,7 @@
           <span class="text-orange-500 fm:text-xs">سفارش در صورت عدم پرداخت تا {{order.time_left}} دقیقه دیگر لغو خواهد شد.</span>
         </div>
         <div class="w-full fd:flex fd:justify-end">
-          <Button text="پرداخت" my_class="w-full fd:w-auto fd:!text-sm !p-2"/>
+          <Button @click="pay(order.id)" text="پرداخت" my_class="w-full fd:w-auto fd:!text-sm !p-2"/>
         </div>
       </div>
       <div v-else-if="order.shipping_status === 'delivered_to_the_customer'" class="flex justify-end mt-6">
@@ -199,6 +199,17 @@ async function returned(){
     await emits('parentMethod',false, store.state.current)
     Toast.success();
     returnedModal.value.toggleModal();
+  }).catch(err=>{
+    store.commit('handleError',err)
+  })
+  btnLoading.value = false;
+}
+
+async function pay(_orderId){
+  btnLoading.value = true;
+  await axios.get(`${store.state.api}order/pay/${_orderId}`).then(async resp=>{
+    let redirectUrl = resp.data.data.redirect_url;
+    window.location.href = redirectUrl ? redirectUrl : '/payment-alert?status=success&msg=سفارش با موفقیت ثبت شد'
   }).catch(err=>{
     store.commit('handleError',err)
   })
