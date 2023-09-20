@@ -306,14 +306,19 @@ function openCommentModal(_productId){
 }
 
 async function pay(_orderId){
-  btnLoading.value = true;
-  await axios.get(`${store.state.api}order/pay/${_orderId}`).then(async resp=>{
-    let redirectUrl = resp.data.data.redirect_url;
-    window.location.href = redirectUrl ? redirectUrl : '/payment-alert?status=success&msg=سفارش با موفقیت ثبت شد'
-  }).catch(err=>{
-    store.commit('handleError',err)
-  })
-  btnLoading.value = false;
+  let _confirm = confirm("هزینه این سفارش هنوز پرداخت نشده‌ و در صورت اتمام موجودی هر کدام از کالاها ان کالا خود کار از سبد حذف می‌شوند")
+  if(_confirm){
+    btnLoading.value = true;
+    await axios.get(`${store.state.api}order/pay/${_orderId}`).then(async resp=>{
+      let redirectUrl = resp.data.data.redirect_url;
+      window.location.href = redirectUrl ? redirectUrl : '/payment-alert?status=success&msg=سفارش با موفقیت ثبت شد'
+    }).catch(err=>{
+      store.commit('handleError',err)
+    })
+    btnLoading.value = false;
+  }else{
+    Toast.error("عملیات لغو شد")
+  }
 }
 async function show(_orderDetailId,_weightType){
   orderDetailId.value = _orderDetailId
