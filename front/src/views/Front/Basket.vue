@@ -104,7 +104,7 @@ const calcPercent = computed(()=>{
 
 async function removeBasket(basketId){
   if(store.state.basketLoadingAction === false){
-    await store.dispatch('removeBasket',{basketId:basketId,showBasket:false, withProduct:true})
+    await store.dispatch('removeBasket',{basketId:basketId,showBasket:false,withCount:true,withProduct:true})
     store.state.showBasket=false;
   }
 }
