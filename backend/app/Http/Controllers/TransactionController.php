@@ -6,6 +6,7 @@ use App\Enums\DebtorStatusEnum;
 use App\Enums\ShippingEnum;
 use App\Models\Debtor;
 use App\Models\Order;
+use App\Models\Product;
 use App\Models\User;
 use App\Models\Wallet;
 use App\Services\Bank\Payment;
@@ -52,6 +53,8 @@ class TransactionController extends Controller
         $order->update(['shipping_status' => ShippingEnum::REVIEW_QUEUE]);
         $order->orderDetails()->update(['shipping_status' => ShippingEnum::REVIEW_QUEUE]);
         insertTransaction($order, (int) $user->id, (int) $response['amount'], $response['refNumber']);
+        $productIds = $order->orderDetails->map(fn($item)=>$item->product_id)->toArray();
+        Product::whereIn('id',$productIds)->update(['count'=>DB::raw("count - 1")]);
     }
 
     private function updateWallet(array $response){
