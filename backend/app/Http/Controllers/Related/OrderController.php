@@ -324,6 +324,8 @@ class OrderController extends Controller
      * @throws \Exception
      */
     public function payOrder(Order $order){
+        $order->orderDetails()->whereRelation('product','count','<=',0)->delete();
+        $order = $order->where(['id'=>$order->id])->with('orderDetails')->first();
         $amount = $order->orderDetails->sum('amount');
         $redirectUrl = Payment::driver('Zibal')->request(setGateway((int) $amount, (int) $order->id, $order->user->mobile, 'order'));
         return response(['status'=>'success','data'=>['redirect_url'=>$redirectUrl]]);

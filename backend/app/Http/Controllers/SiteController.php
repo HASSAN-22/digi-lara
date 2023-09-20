@@ -219,6 +219,9 @@ class SiteController extends Controller
         ];
         $baskets = BasketService::basket()->forUser(auth()->Id())->relations($relations)->calcAmount(true)->get();
         unset($baskets['amount']);
+        if($baskets->count() <= 0 ){
+            return response(['status'=>'error','ms'=>'کالای انتخاب شده دیگر موجود نمیباشند'],500);
+        }
         DB::beginTransaction();
         try {
             $weightType = $baskets->unique('product.category.weight_type')->pluck('product.category.weight_type')->filter()->toArray();
