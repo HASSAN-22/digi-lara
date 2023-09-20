@@ -300,7 +300,11 @@ class SiteController extends Controller
             DB::commit();
             $redirectUrl = null;
             if($amount > 0){
-                $redirectUrl = Payment::driver('Zibal')->request(setGateway((int) $amount, (int) $order->id, $user->mobile, 'order'));
+                try {
+                    $redirectUrl = Payment::driver('Zibal')->request(setGateway((int) $amount, (int) $order->id, $user->mobile, 'order'));
+                }catch (\Exception $e){
+                    return response(['status'=>'error'],500);
+                }
             }
             return response(['status'=>'success', 'data'=>['redirect_url'=>$redirectUrl]],201);
         }catch (\Exception $e){

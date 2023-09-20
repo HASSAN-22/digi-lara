@@ -242,7 +242,7 @@ async function addOrder(){
       Toast.success()
     },2000)
     let redirectUrl = resp.data.data.redirect_url;
-    window.location.href = redirectUrl ? redirectUrl : '/payment-alert?status=success&msg=سفارش با موفقیت ثبت شد'
+    window.location.href = redirectUrl ? redirectUrl : '/payment-alert?status=success&msg=با موفقیت پرداخت شد'
   }).catch(err=>{
     Toast.error('یک خطای غیر منتظره رخ داده است')
   })

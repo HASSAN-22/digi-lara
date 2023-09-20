@@ -211,7 +211,7 @@ async function pay(_orderId){
     btnLoading.value = true;
     await axios.get(`${store.state.api}order/pay/${_orderId}`).then(async resp=>{
       let redirectUrl = resp.data.data.redirect_url;
-      window.location.href = redirectUrl ? redirectUrl : '/payment-alert?status=success&msg=سفارش با موفقیت ثبت شد'
+      window.location.href = redirectUrl ? redirectUrl : '/payment-alert?status=error&msg=پرداخت با خطا مواجه شد'
     }).catch(err=>{
       store.commit('handleError',err)
     })

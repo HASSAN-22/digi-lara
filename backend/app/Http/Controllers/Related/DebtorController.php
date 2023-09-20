@@ -35,19 +35,23 @@ class DebtorController extends Controller
         $this->authorize('pay',$debtor);
         DB::beginTransaction();
         try {
-            $redirectUrl = null;
             $user = auth()->user();
             if($request->pay_type == 'wallet'){
                 $wallet = $user->wallet;
                 if($wallet->amount > $debtor->amount){
-                    insertTransaction($debtor, (int) $user->id, (int) $debtor->amount, Str::random(8));
                     $debtor->update(['amount'=>0,'status'=>DebtorStatusEnum::SETTLED]);
+                    $wallet->update(['amount'=>DB::raw("amount - {$debtor->amount}")]);
+                    insertTransaction($debtor, (int) $user->id, (int) $debtor->amount, Str::random(8));
                     DB::commit();
                     return response(['status'=>'success'],201);
                 }
                 return response(['status'=>'success','msg'=>'موجودی کیف پول کافی نیست'],500);
             }else{
-                $redirectUrl = Payment::driver('Zibal')->request(setGateway($debtor->amount, $debtor->id, $user->mobile, 'debtor'));
+                try {
+                    $redirectUrl = Payment::driver('Zibal')->request(setGateway($debtor->amount, $debtor->id, $user->mobile, 'debtor'));
+                }catch (\Exception $e){
+                    return response(['status'=>'error'],500);
+                }
                 return response(['status'=>'success','data'=>['redirect_url'=>$redirectUrl]]);
             }
         }catch (\Exception $e){

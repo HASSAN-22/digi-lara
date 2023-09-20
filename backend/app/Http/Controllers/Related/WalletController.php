@@ -38,7 +38,11 @@ class WalletController extends Controller
         $wallet = Wallet::firstOrNew(['user_id'=>$this->user->id]);
         $wallet->amount = $wallet->amount ?? 0;
         $wallet->save();
-        $redirectUrl = Payment::driver('Zibal')->request(setGateway($request->amount, $wallet->id, $user->mobile, 'wallet'));
+        try {
+            $redirectUrl = Payment::driver('Zibal')->request(setGateway($request->amount, $wallet->id, $user->mobile, 'wallet'));
+        }catch (\Exception $e){
+            return response(['status'=>'error'],500);
+        }
         return response(['status'=>'success','data'=>['redirect_url'=>$redirectUrl]]);
     }
 
