@@ -345,8 +345,10 @@ async function dashboard(){
     walletAmount.value = data.wallet_amount;
     if(data.store_detail){
       store.state.siteName = data.store_detail.shop_name_ir
-      store.state.url = data.store_detail.shop_url;
-      store.state.api = data.store_detail.shop_url + '/api/';
+      store.state.url = data.store_detail.shop_url ? data.store_detail.shop_url : process.env.VUE_APP_BACKEND;
+      store.state.api = data.store_detail.shop_url ? data.store_detail.shop_url : process.env.VUE_APP_BACKEND;
+      store.state.api += '/api/';
+      store.dispatch('setFavicon',data.store_detail.favicon)
       store.state.configSite = {...data.store_detail}
     }
     if(data.footer_box){

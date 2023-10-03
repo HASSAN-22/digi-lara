@@ -67,6 +67,7 @@ class ShopconfigController extends Controller
             'samandehi'=>['nullable','string','max:500'],
             'mojavez'=>['nullable','string','max:500'],
             'logo'=>['required','regex:/data:image\\/(jpeg|jpeg|png|svg)/i'],
+            'favicon'=>['required','regex:/data:image\\/(jpeg|jpeg|png|ico)/i'],
             'footer_logo'=>['required','regex:/data:image\\/(jpeg|jpeg|png|svg)/i'],
             'copy_right'=>['required','string','max:400'],
             'shop_bio'=>['required','string','max:10000'],

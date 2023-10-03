@@ -1,6 +1,7 @@
 import Axios from "axios";
+import store from "@/store";
 const axios = Axios.create({
-  baseURL: process.env.VUE_APP_API,
+  baseURL: store.state.api,
   withCredentials: true,
   headers:{
     'X-Requested-With':'XMLHttpRequest',

@@ -2,6 +2,9 @@ import { createStore } from 'vuex'
 import axios from '@/plugins/axios';
 import Toast from "@/plugins/toast";
 import Swal from "sweetalert2";
+import {useFavicon} from "@vueuse/core";
+
+
 export default createStore({
   state: {
     siteName:'فروشگاه لارا کالا',
@@ -166,6 +169,10 @@ export default createStore({
     }
   },
   actions: {
+    setFavicon({state}, favicon){
+      const icon = useFavicon()
+      icon.value = favicon
+    },
     async setCookie({state},name) {
       let expires = "";
       let date = new Date();

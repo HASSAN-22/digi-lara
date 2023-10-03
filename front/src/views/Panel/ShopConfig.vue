@@ -89,6 +89,12 @@
                 <img :src="footerLogoPreview" class="w-[100px] h-[100px]"/>
               </div>
             </div>
+            <div class="fd:w-[50%]">
+              <Input type="file" label="favicon" @change="getFile($event, 'favicon')" :key="faviconKey"  alert="فرمت تصویر: JPG,JPEG,PNG,ICO" id="favicon"/>
+              <div v-if="faviconPreview">
+                <img :src="faviconPreview" class="w-[100px] h-[100px]"/>
+              </div>
+            </div>
           </div>
           <div class="flex fm:flex-col fd:items-center justify-between gap-5 mb-5">
             <Input type="number" label="تلفن پشتیبانی" v-model="supportPhone" id="supportPhone"/>
@@ -296,6 +302,9 @@ let email = ref('');
 let logo = ref('');
 let logoPreview = ref('');
 let logoKey = ref('');
+let favicon = ref('');
+let faviconPreview = ref('');
+let faviconKey = ref('');
 let footerLogo = ref('');
 let footerLogoPreview = ref('');
 let footerLogoKey = ref('');
@@ -417,6 +426,9 @@ async function showStoreDetail(_loading=true){
       logo.value=data.logo;
       logoPreview.value=data.logo;
       logoKey.value++;
+      favicon.value=data.favicon;
+      faviconPreview.value=data.favicon;
+      faviconKey.value++;
       footerLogo.value=data.footer_logo;
       footerLogoPreview.value=data.footer_logo;
       footerLogoKey.value++;
@@ -435,6 +447,7 @@ async function insertStoreDetail(){
     support_phone:supportPhone.value,
     email:email.value,
     logo:logo.value,
+    favicon:favicon.value,
     footer_logo:footerLogo.value,
     enamad:enamad.value,
     samandehi:samandehi.value,
@@ -637,6 +650,10 @@ async function getFile(event, type){
     logo.value = await makeBase64Image(image);
     logoPreview.value = URL.createObjectURL(image);
     logoKey.value ++;
+  }else if(type === 'favicon'){
+    favicon.value = await makeBase64Image(image);
+    faviconPreview.value = URL.createObjectURL(image);
+    faviconKey.value ++;
   }else if(type === 'footer_logo'){
     footerLogo.value = await makeBase64Image(image);
     footerLogoPreview.value = URL.createObjectURL(image);
