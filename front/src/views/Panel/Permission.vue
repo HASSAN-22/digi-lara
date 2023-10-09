@@ -18,15 +18,11 @@
         <table class="w-full border-collapse lg:table 2xl:table xl:lg:table md:table">
           <Thead :titles="[
               'نقش',
-              'دسترسی ها',
               'عملیات'
               ]" />
           <tbody class="block lg:table-row-group xl:table-row-group 2xl:table-row-group md:table-row-group">
           <tr v-for="item in allData" :key="item.id" class="border border-gray-200 block lg:table-row xl:table-row 2xl:table-row md:table-row">
             <Td title="نقش" class="fm:text-sm">{{item.name}}</Td>
-            <Td title="دسترسی ها">
-              <Button @click="showPermissions(item.permissions)" my_class="!bg-white border border-green-500 !py-2 !px-2 fm:py-1 fm:px-1"><i class="far fm:text-sm fa-eye text-green-500"></i></Button>
-            </Td>
             <Td title="عملیات">
               <div class="flex items-center justify-center gap-2">
                 <Button @click="show(item.id)" my_class="!bg-white border border-blue-500 !py-2 !px-2 fm:py-1 fm:px-1"><i class="far fm:text-sm fa-edit text-blue-500"></i></Button>
@@ -418,7 +414,7 @@ async function getRoles(){
 
 async function insert(){
   btnLoading.value = true;
-  await axios.post(`${store.state.api}create/${role.value}`,formData()).then(resp=>{
+  await axios.post(`${store.state.api}${model.value}/create`,formData()).then(resp=>{
     clearData();
     Toast.success();
     getData(false, store.state.current)
@@ -444,7 +440,7 @@ async function show(postId){
 
 async function update(){
   isUpdate.value = btnLoading.value =  true;
-  await axios.post(`${store.state.api}update`,formData(true)).then(resp=>{
+  await axios.post(`${store.state.api}${model.value}/update`,formData(true)).then(resp=>{
     clearData();
     Toast.success("تغییرات با موفقیت ثبت شد");
     getData(false,store.state.current)
@@ -481,17 +477,17 @@ function clearData(){
   store.state.permissions = [];
 }
 
-function convertToPersian(permission){
-  let faPermissions = [];
-  for(let i = 0; i<permission.length; i++){
-    let perm = store.state.faPermissions.filter(item=>item[permission[i].name])[0]
-    faPermissions.push(perm[permission[i].name])
-  }
-  return faPermissions;
-}
+// function convertToPersian(permission){
+//   let faPermissions = [];
+//   for(let i = 0; i<permission.length; i++){
+//     let perm = store.state.faPermissions.filter(item=>item[permission[i].name])[0]
+//     faPermissions.push(perm[permission[i].name])
+//   }
+//   return faPermissions;
+// }
 
-function showPermissions(permissions){
-  persianPermissions.value = convertToPersian(permissions)
-  permissionsModal.value.toggleModal();
-}
+// function showPermissions(permissions){
+//   persianPermissions.value = convertToPersian(permissions)
+//   permissionsModal.value.toggleModal();
+// }
 </script>

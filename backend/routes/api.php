@@ -159,8 +159,8 @@ Route::group(['middleware'=>'auth:sanctum'],function (){
         Route::delete('role-permission/{role}','destroy');
 
         Route::get('permission','indexPermission');
-        Route::post('create','createPermission');
-        Route::patch('update','updatePermission');
+        Route::post('permission/create','createPermission');
+        Route::patch('permission/update','updatePermission');
         Route::get('permission/{role}','showPermission');
         Route::get('get-roles','getRoles');
     });

@@ -12,10 +12,10 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule): void
     {
+        $schedule->command('shop:reset-amazing-offer')->everyFourMinutes();
         $schedule->command('shop:amazing-product')->everyMinute();
         $schedule->command('shop:notify-exists')->at('00:00');
         $schedule->command('shop:cancel-order')->cron('*/10 * * * *');
-        $schedule->command('shop:reset-amazing-offer')->everyFourMinutes();
         $schedule->command('shop:pay-to-seller')->cron('0 * * * *');
         $schedule->command('queue:work --stop-when-empty')
             ->everyMinute()
