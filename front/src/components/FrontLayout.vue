@@ -256,7 +256,6 @@
               <span class="text-2xl !font-bold fm:text-lg">با {{$store.state.configSite.shop_name_ir}}</span>
             </div>
             <ul class="flex flex-col space-y-4 mt-6">
-              <li class="text-gray-500"><routerLink :to="{name:'PageDetail', params:{id:1}}">اتاق خبر {{$store.state.configSite.shop_name_ir}}</routerLink></li>
               <li class="text-gray-500"><routerLink :to="{name:'PageDetail', params:{id:2}}">فروش در {{$store.state.configSite.shop_name_ir}}</routerLink></li>
               <li class="text-gray-500"><routerLink :to="{name:'PageDetail', params:{id:3}}">گزارش تخلف در {{$store.state.configSite.shop_name_ir}}</routerLink></li>
               <li class="text-gray-500"><routerLink :to="{name:'ContactUs'}">تماس با {{$store.state.configSite.shop_name_ir}}</routerLink></li>

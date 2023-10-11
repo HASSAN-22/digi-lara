@@ -297,7 +297,7 @@
           </div>
           <div class="mt-4">
             <div :class="['p-2',tab === 1 ? 'block' : 'hidden']">
-              <p class="break-words fm:text-sm" v-html="product.description"></p>
+              <p class="break-words fm:text-sm no-tailwindcss" v-html="product.description"></p>
               <div class="mt-6 flex flex-col gap-5">
                 <div class="flex items-center gap-2" v-if="JSON.parse(product.strengths).length > 0">
                   <span class="fm:text-sm">نکات مثبت</span>
@@ -314,7 +314,7 @@
               </div>
             </div>
             <div :class="['p-2',tab === 2 ? 'block' : 'hidden']">
-              <p class="break-words fm:text-sm" v-html="product.more_description"></p>
+              <p class="break-words fm:text-sm no-tailwindcss" v-html="product.more_description"></p>
             </div>
             <div :class="['p-2',tab === 3 ? 'block' : 'hidden']">
               <ul>

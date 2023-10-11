@@ -7,7 +7,7 @@
             <h3 class="!font-medium fm:text-md fd:text-lg">{{page.title}}</h3>
           </div>
           <div class="flex flex-col w-full gap-5">
-            <p class="break-all" v-html="page.description"></p>
+            <p class="no-tailwindcss" v-html="page.description"></p>
           </div>
         </div>
       </div>

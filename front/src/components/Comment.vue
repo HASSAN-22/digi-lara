@@ -117,7 +117,7 @@
                 حجم هر تصویر: {{$store.state.imageSize}}
               </li>
             </ul>
-            <p v-html="$store.state.configSite.comment_rule"></p>
+            <p class="no-tailwindcss" v-html="$store.state.configSite.comment_rule"></p>
           </div>
         </div>
       </div>

@@ -1,6 +1,7 @@
 /** @type {import('tailwindcss').Config} */
 module.exports = {
   content: ['./public/**/*.html', './src/**/*.{vue,js,ts,jsx,tsx}'],
+
   options: {
     whitelistPatterns: [
       /-(leave|enter|appear)(|-(to|from|active))$/,

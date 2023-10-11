@@ -13,6 +13,10 @@ html{
   scroll-behavior: smooth;
 }
 
+.no-tailwindcss *{
+ all: revert;
+}
+
 .rtl{
   direction: rtl !important;
 }

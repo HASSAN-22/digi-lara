@@ -23,7 +23,7 @@ class PageRequest extends FormRequest
     {
         return [
             'title'=>['required','string','max:255'],
-            'description'=>['required','string','max:30000'],
+            'description'=>['required','string','max:7000000'],
         ];
     }
 }

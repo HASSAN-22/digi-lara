@@ -8,10 +8,9 @@
         <div>
           <img :src="props.widget.box_image" />
         </div>
-        <div class="flex flex-row gap-2 items-center text-white">
-          <span class="!font-bold fm:text-sm">مشاهده همه</span>
-          <span class="flex"><i class="fa fa-chevron-left text-sm fm:text-xs"></i></span>
-        </div>
+        <routerLink :to="{name:'SpecialProduct'}" class="flex flex-row gap-2 items-center text-white">
+          <span class="!font-bold fm:text-sm">مشاهده همه</span><span class="flex"><i class="fa fa-chevron-left text-sm fm:text-xs"></i></span>
+        </routerLink>
       </div>
       <div class="py-4 fd:w-[80%] fm:w-[70%]">
         <Slider :slides="(displaySize < 769) ? 2 : 5">

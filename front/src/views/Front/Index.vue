@@ -52,8 +52,8 @@
               <span class="text-2xl fm:text-lg !font-medium">پرفروش‌ترین کالاها</span>
             </div>
             <div>
-              <routerLink :to="{name:'BestSelling'}" target="_blank">
-                <span class="text-lg text-blue-400 fm:text-sm">مشاهده همه</span>
+              <routerLink :to="{name:'BestSelling'}" target="_blank" class="text-lg text-blue-400 fm:text-sm">
+                <span >مشاهده همه</span>
               </routerLink>
             </div>
           </div>
@@ -106,6 +106,7 @@
       </div>
     </div>
     <Meta :title="$store.state.siteName + ` | صفحه اصلی`"/>
+    <Loading :loading="loading"/>
   </div>
 </template>
 
@@ -117,6 +118,7 @@ export default{name: "Index"}
 import {ref, onBeforeUnmount, onMounted} from "vue";
 import Slider from "@/components/Slider.vue";
 import Meta from "@/components/Meta.vue";
+import Loading from "@/components/Loading.vue";
 import { SwiperSlide } from 'swiper/vue';
 import axios from "@/plugins/axios";
 import store from "@/store";
@@ -131,6 +133,7 @@ let sliders = ref([]);
 let widgets = ref([]);
 let news = ref([]);
 let bestSellingProducts = ref([]);
+let loading = ref(false)
 
 onBeforeUnmount(() => {
   window.removeEventListener('resize', onResize)
@@ -142,6 +145,7 @@ onMounted(async () => {
 })
 
 async function index(){
+  loading.value = true;
   await axios.get(`${store.state.api}content`).then(resp=>{
     let data = resp.data.data;
     sliders.value = data.sliders;
@@ -149,6 +153,7 @@ async function index(){
     bestSellingProducts.value = data.best_selling_products;
     news.value = data.news;
   })
+  loading.value = false;
 }
 
 function onResize() {
