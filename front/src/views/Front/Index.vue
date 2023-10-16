@@ -60,14 +60,14 @@
 
           <div class="expensive mt-8">
             <div class="flex flex-wrap gap-4 justify-around">
-              <routerLink :to="{name:'ProductDetail', params:{slug:item.slug}}" :class="['w-[25%] flex items-center justify-between gap-3 border-b border-gray-200 mb-8']" v-for="(item,index) in bestSellingProducts" :key="item.id">
+              <routerLink :to="{name:'ProductDetail', params:{slug:item.slug}}" :class="['w-[25%] fm:w-full flex items-center gap-3 border-b border-gray-200 pb-3 mb-8']" v-for="(item,index) in bestSellingProducts" :key="item.id">
                 <div class="w-[30%]">
                   <img :src="$store.state.url + item.image" class="rounded"/>
                 </div>
-                <div>
+                <div class="w-[5%]">
                   <span class="text-2xl !font-extrabold text-blue-400">{{(parseInt(index)+1)}}</span>
                 </div>
-                <div class="flex flex-col gap-2">
+                <div class="flex flex-col gap-2 w-[65%]">
                   <span class="text-sm text-">{{item.ir_name}}</span>
                 </div>
 
@@ -79,7 +79,7 @@
         <div class="mt-14">
           <div class="flex justify-between items-center">
             <div>
-              <span class="text-2xl fm:text-lg !font-medium">خواندی ها</span>
+              <span class="text-2xl fm:text-lg !font-medium">اخرین خبرها</span>
             </div>
             <div>
               <routerLink :to="{name:'NewsList',query:{slug:'مشاهده همه اخبار'}}">

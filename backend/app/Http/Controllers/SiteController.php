@@ -596,7 +596,12 @@ class SiteController extends Controller
             $item->product['rating'] = $rating;
             return $item->product;
         });
-        $products = $compares[0]->category->products()->whereNotIn('id',$compares->pluck('id')->toArray())->where('publish',PublishEnum::PUBLISHED->value)->whereHas('user',fn($q)=>$q->where('status','yes'))->get($columns);
+        $products = $compares[0]->category->products()->with('productComments')->whereNotIn('id',$compares->pluck('id')->toArray())->where('publish',PublishEnum::PUBLISHED->value)->whereHas('user',fn($q)=>$q->where('status','yes'))->get($columns)
+            ->map(function ($item){
+                list($average, $rating) = $this->calcProductRating($item->productComments);
+                $item['rating'] = $rating;
+                return $item;
+            });;
         return response(['status'=>'success','data'=>['compares'=>$compares, 'products'=>$products]]);
     }
 

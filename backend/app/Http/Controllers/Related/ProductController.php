@@ -325,7 +325,7 @@ class ProductController extends Controller
     {
         $images = [];
         foreach ($request->images as $key => $image) {
-            $path = Upload::resizable(config('app.large_image_size'), config('app.large_image_size'),'webp')->upload($request, 'images', $this->DIRECTORY, null, $key);
+            $path = Upload::resizable((int) config('app.large_image_size'), (int)  config('app.large_image_size'),'webp')->upload($request, 'images', $this->DIRECTORY, null, $key);
             $images[] = [
                 'product_id' => $productId,
                 'image' => $path,

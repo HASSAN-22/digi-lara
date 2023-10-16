@@ -27,7 +27,7 @@
                 <span class="text-sm text-red-400" v-if="product.count <= 3">تنها {{product.count}} عدد در انبار باقی مانده</span>
               </div>
               <div class="flex items-center gap-2">
-                <span class="text-sm !font-medium">{{product.rating.toFixed(1)}}</span>
+                <span class="text-sm !font-medium">{{fixedRating(product.rating)}}</span>
                 <span><i class="far fa-star text-yellow-300"></i></span>
               </div>
             </div>
@@ -60,7 +60,7 @@ export default{name:"ProductComponent"}
 </script>
 
 <script setup>
-import {defineProps, ref, defineEmits, defineExpose} from "vue"
+import {defineProps, ref, defineEmits, defineExpose, computed} from "vue"
 import Countdown from "@/components/Countdown.vue";
 import Button from "@/components/Button";
 const props = defineProps({
@@ -89,6 +89,10 @@ defineExpose({
 async function addCompare(productId){
   emits('addCompare', productId)
 }
+
+const fixedRating =  computed(()=>(_rating)=>{
+  return _rating.toFixed(1)
+})
 
 
 </script>

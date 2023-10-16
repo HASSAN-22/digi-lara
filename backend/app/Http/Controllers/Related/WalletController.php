@@ -35,7 +35,7 @@ class WalletController extends Controller
     {
         $this->authorize('create',Wallet::class);
         $user = auth()->user();
-        $wallet = Wallet::firstOrNew(['user_id'=>$this->user->id]);
+        $wallet = Wallet::firstOrNew(['user_id'=>$user->id]);
         $wallet->amount = $wallet->amount ?? 0;
         $wallet->save();
         try {

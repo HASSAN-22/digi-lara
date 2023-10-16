@@ -1,8 +1,6 @@
 <template>
   <div>
     <div class="container mx-auto">
-      | {{isMobile}} | {{products.length}}<br>
-      {{(isMobile && products.length >= 2)}}
       <div class="mt-20 mx-10 relative">
         <div class="flex justify-evenly gap-1">
           <div class="fd:w-[21rem] fm:w-full" v-for="(product,index) in products" :key="product.id">
@@ -15,22 +13,22 @@
                   <span class="cursor-pointer" @click="removeCompare(product.id)"><i class="far fa-times"></i></span>
                 </div>
                 <div class="text-center">
-                  <span class="fm:text-sm">{{product.ir_name}}</span>
+                  <routerLink :to="{name:'ProductDetail', params:{slug:product.slug}}">{{product.ir_name}}</routerLink>
                 </div>
                 <div class="flex items-center gap-1">
                   <span class="fm:text-sm"><i class="far fa-star text-yellow-300 fm:text-sm"></i></span>
-                  <span class="fm:text-sm">{{product.rating.toFixed(1)}}</span>
+                  <span class="fm:text-sm">{{fixedRating(product.rating)}}</span>
                 </div>
                 <div>
                   <span class="fm:text-sm">{{productPrice(product).amount}} ریال</span>
                 </div>
               </div>
             </div>
-            <div class="flex flex-col gap-4 mt-5 border-b border-gray-200 pb-2" v-for="(productProperties,i) in product.product_properties" :key="productProperties.id">
-              <span v-if="index === 0" class="text-gray-500 fm:text-sm">{{properties[i]}}</span>
-              <span v-if="index !== 0" class="text-white">{{properties[i]}}</span>
+            {{}}
+            <div class="flex flex-col gap-4 mt-5 border-b border-gray-200 pb-2" v-for="(productProperty,i) in mergeProperty(product.product_properties)" :key="i">
+              <span class="text-gray-500 fm:text-sm">{{properties[i]}}</span>
               <div class="flex gap-2">
-                <span class="fm:text-sm !font-medium">{{productProperties.property_type.name ?? '---'}}</span>
+                <span class="fm:text-sm !font-medium">{{productProperty}}</span>
               </div>
             </div>
           </div>
@@ -78,8 +76,19 @@ onMounted(async ()=>{
   window.addEventListener('resize', onResize)
 })
 
+function mergeProperty(_properties){
+  let data = [];
+  for(let i = 0; i < properties.value.length; i++){
+    let allProperties = _properties.filter(item=>item.property.property === properties.value[i]);
+    let names = allProperties.length > 0 ? allProperties.map(item=>item.property_type.name) : ['---']
+    data.push(names.join(','))
+  }
+  return data
+}
+
 async function getData(_loading=true){
   loading.value = _loading;
+  properties.value = [];
   await axios.get(`${store.state.api}get-compares`).then(resp=>{
     let data = resp.data.data;
     products.value = data.compares.sort((a, b) => b.product_properties.length - a.product_properties.length);
@@ -93,6 +102,10 @@ async function getData(_loading=true){
   })
   loading.value = false;
 }
+
+const fixedRating =  computed(()=>(_rating)=>{
+  return _rating.toFixed(1)
+})
 
 const productPrice = computed(()=>(product)=>{
   let amount = 0;
